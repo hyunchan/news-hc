@@ -24,12 +24,16 @@
 # Android Studio/IntelliJ
 *.iml
 .gradle
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+
+# Ignore all .idea files, but keep some shared settings
+/.idea/
+# Keep code style settings
+!/.idea/codeStyles/
+# Keep run configurations
+!/.idea/runConfigurations/
+# Keep inspection profiles
+!/.idea/inspectionProfiles/
+
 .DS_Store
 /build
 /captures
