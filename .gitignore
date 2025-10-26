@@ -1,0 +1,37 @@
+# Built application files
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Keystore files
+*.jks
+*.keystore
+
+# Log files
+*.log
+
+# Profiler dumps
+*.hprof
+
+# Play Asset Delivery temp files
+.play/
+
+# Local properties
+/local.properties
+
+# Android Studio/IntelliJ
+*.iml
+.gradle
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
