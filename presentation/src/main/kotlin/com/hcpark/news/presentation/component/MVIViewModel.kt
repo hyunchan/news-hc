@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-//references: https://velog.io/@victorywoo/Android-MVI-Architecture-with-Kotlin-Flows-and-Channels-%EB%B2%88%EC%97%AD
+// references: https://velog.io/@victorywoo/Android-MVI-Architecture-with-Kotlin-Flows-and-Channels-%EB%B2%88%EC%97%AD
 
 interface UiState
 interface UiEvent
