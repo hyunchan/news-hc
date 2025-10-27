@@ -51,3 +51,8 @@ compose = [
     "androidx-compose-ui-tooling-preview",
     "androidx-compose-material3",
 ]
+android-test = [
+    "androidx-junit",
+    "androidx-espresso-core",
+    "androidx-compose-ui-test-junit4",
+]
