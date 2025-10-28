@@ -2,6 +2,7 @@ plugins {
     `java-library`
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.ksp)
 }
 
 java {
@@ -18,4 +19,8 @@ detekt {
 
 dependencies {
     detektPlugins(libs.detekt.formatting)
+
+    implementation(project(":util"))
+
+    ksp(libs.hilt.compiler)
 }
