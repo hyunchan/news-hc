@@ -8,16 +8,14 @@ plugins {
 
 android {
     namespace = "com.hcpark.news.app"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk = properties["compileSdk"].toString().toInt()
 
     defaultConfig {
         applicationId = "com.hcpark.news.app"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = libs.versions.versionCode.get().toInt()
-        versionName = libs.versions.versionName.get()
-
-        testInstrumentationRunner = libs.versions.testInstrumentationRunner.get()
+        minSdk = properties["minSdk"].toString().toInt()
+        targetSdk = properties["targetSdk"].toString().toInt()
+        versionCode = properties["versionCode"].toString().toInt()
+        versionName = properties["versionName"].toString()
     }
 
     buildTypes {

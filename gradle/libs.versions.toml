@@ -1,12 +1,4 @@
 [versions]
-#project
-compileSdk = "36"
-minSdk = "26"
-targetSdk = "36"
-versionCode = "1"
-versionName = "1.0"
-testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
 #libraries
 agp = "8.13.0"
 kotlin = "2.2.21"

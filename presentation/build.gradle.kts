@@ -9,11 +9,11 @@ plugins {
 
 android {
     namespace = "com.hcpark.news.presentation"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk = properties["compileSdk"].toString().toInt()
 
     defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-        testInstrumentationRunner = libs.versions.testInstrumentationRunner.get()
+        minSdk = properties["minSdk"].toString().toInt()
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
