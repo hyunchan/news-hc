@@ -44,6 +44,8 @@ dependencies {
     implementation(project(":util"))
 
     implementation(libs.hilt.android)
+    implementation(libs.bundles.ktor)
+    implementation(libs.napier)
 
     ksp(libs.hilt.compiler)
 }

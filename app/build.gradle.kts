@@ -1,9 +1,19 @@
+import com.android.build.api.dsl.VariantDimension
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.detekt)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
+}
+
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
+    }
 }
 
 android {
@@ -16,16 +26,27 @@ android {
         targetSdk = properties["targetSdk"].toString().toInt()
         versionCode = properties["versionCode"].toString().toInt()
         versionName = properties["versionName"].toString()
+
+        buildConfigStringField(field = ConfigField.API_KEY, propertyKey = "API_KEY")
+        buildConfigStringField(field = ConfigField.API_HOST, propertyKey = "API_HOST")
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
+        debug {
+            isMinifyEnabled = false
+
+            buildConfigStringField(field = ConfigField.API_KEY, propertyKey = "API_KEY_DEBUG")
+        }
+    }
+    buildFeatures {
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
@@ -52,4 +73,13 @@ dependencies {
     implementation(libs.hilt.android)
 
     ksp(libs.hilt.compiler)
+}
+
+enum class ConfigField {
+    API_KEY, API_HOST
+}
+
+fun VariantDimension.buildConfigStringField(field: ConfigField, propertyKey: String) {
+    val propertyValue = localProperties.getProperty(propertyKey, "")
+    buildConfigField("String", field.name, "\"$propertyValue\"")
 }
