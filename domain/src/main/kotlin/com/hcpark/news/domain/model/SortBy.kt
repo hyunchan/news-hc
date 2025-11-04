@@ -7,7 +7,7 @@ package com.hcpark.news.domain.model
  * - Popularity: 인기 있는 출처와 출판사의 기사가 먼저 표시됩니다.
  * - PublishedAt: 최신 기사가 먼저 표시됩니다.
  */
-@Suppress("SpellCheckingInspection")
+@Suppress("SpellCheckingInspection", "unused")
 enum class SortBy(val key: String) {
     Relevancy("relevancy"),
     Popularity("popularity"),

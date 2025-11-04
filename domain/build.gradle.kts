@@ -22,5 +22,10 @@ dependencies {
 
     implementation(project(":util"))
 
+    implementation(libs.hilt.core)
+    implementation(libs.napier)
+
     ksp(libs.hilt.compiler)
+
+    testImplementation(libs.bundles.test)
 }

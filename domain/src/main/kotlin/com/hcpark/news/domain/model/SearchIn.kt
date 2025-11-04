@@ -1,5 +1,6 @@
 package com.hcpark.news.domain.model
 
+@Suppress("unused")
 enum class SearchIn(val key: String) {
     Title("title"),
     Description("description"),

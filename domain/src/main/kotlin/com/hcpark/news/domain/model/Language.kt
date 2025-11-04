@@ -18,7 +18,7 @@ package com.hcpark.news.domain.model
  * - UD: 우르두어
  * - ZH: 중국어
  */
-@Suppress("SpellCheckingInspection")
+@Suppress("SpellCheckingInspection", "unused")
 enum class Language(val key: String) {
     AR("ar"),
     DE("de"),
