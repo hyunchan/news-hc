@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.detekt)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.serialization)
 }
 
 android {
@@ -46,6 +47,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.bundles.ktor)
     implementation(libs.napier)
+    implementation(libs.kotlinx.serialization.json)
 
     ksp(libs.hilt.compiler)
 }

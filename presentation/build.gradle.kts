@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.detekt)
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.serialization)
     alias(libs.plugins.ksp)
 }
 
@@ -51,7 +52,10 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
+
     implementation(libs.hilt.android)
+    implementation(libs.napier)
+    implementation(libs.kotlinx.serialization.json)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.android.test)

@@ -1,7 +1,9 @@
 package com.hcpark.news.presentation.theme
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
 
 internal val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -24,3 +26,6 @@ internal val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1C1B1F),
      */
 )
+
+val colorScheme
+    @Composable get() = MaterialTheme.colorScheme

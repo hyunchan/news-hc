@@ -41,8 +41,6 @@ android {
         }
         debug {
             isMinifyEnabled = false
-
-            buildConfigStringField(field = ConfigField.API_KEY, propertyKey = "API_KEY_DEBUG")
         }
     }
     buildFeatures {
@@ -71,6 +69,8 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.hilt.android)
+    implementation(libs.androidx.startup.runtime)
+    implementation(libs.napier)
 
     ksp(libs.hilt.compiler)
 }
