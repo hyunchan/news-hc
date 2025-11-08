@@ -33,6 +33,8 @@
 !/.idea/runConfigurations/
 # Keep inspection profiles
 !/.idea/inspectionProfiles/
+# Keep project prompts
+!/.idea/project.prompts.xml
 
 .DS_Store
 /build
