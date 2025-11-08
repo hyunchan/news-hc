@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.hcpark.news.domain.model.NewsArticle
 import com.hcpark.news.domain.usecase.GetTopHeadlineArticlesUseCase
 import com.hcpark.news.presentation.component.MVIViewModel
+import com.hcpark.news.presentation.main.navigation.MainRoute
 import com.hcpark.news.presentation.top20.contract.Top20Contract.Effect
 import com.hcpark.news.presentation.top20.contract.Top20Contract.Event
 import com.hcpark.news.presentation.top20.contract.Top20Contract.ModalState
@@ -29,6 +30,7 @@ class Top20ViewModel @Inject constructor(
         when (event) {
             is Event.OnRefresh -> fetch()
             is Event.OnDismissModal -> dismissModal()
+            Event.OnMoreNewsClick -> launchNews()
             is Event.OnArticleClick -> openLink(event.article)
             is Event.OnBookmarkClick -> toggleBookmark(event.article)
             is Event.OnShareClick -> share(event.article)
@@ -49,6 +51,9 @@ class Top20ViewModel @Inject constructor(
 
     private fun dismissModal() {
         setModalState(ModalState.Dismiss)
+    }
+    private fun launchNews(){
+        setEffect(Effect.Launch(MainRoute.news()))
     }
 
     private fun openLink(article: NewsArticle) {

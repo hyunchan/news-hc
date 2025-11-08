@@ -14,6 +14,7 @@ object Top20Contract {
     sealed class Event : UiEvent {
         data object OnRefresh : Event()
         data object OnDismissModal : Event()
+        data object OnMoreNewsClick : Event()
         data class OnArticleClick(val article: NewsArticle) : Event()
         data class OnShareClick(val article: NewsArticle) : Event()
         data class OnBookmarkClick(val article: NewsArticle) : Event()

@@ -16,5 +16,9 @@ enum class Category(val key: String?) {
 
     companion object {
         val Default: Category = All
+
+        fun fromKey(key: String?): Category {
+            return entries.firstOrNull { it.key == key } ?: Default
+        }
     }
 }
