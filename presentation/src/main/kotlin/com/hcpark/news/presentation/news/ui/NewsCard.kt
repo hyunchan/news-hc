@@ -34,6 +34,7 @@ import java.time.LocalDateTime
 fun NewsCard(
     article: NewsArticle,
     onClick: () -> Unit,
+    onSourceClick: () -> Unit,
     onShare: () -> Unit,
     onBookmark: () -> Unit
 ) {
@@ -65,6 +66,7 @@ fun NewsCard(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
+                        modifier = Modifier.clickable(onClick = onSourceClick),
                         text = article.source.name,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary
@@ -129,6 +131,7 @@ private fun NewsCardPreview() {
         NewsCard(
             article = article,
             onClick = { },
+            onSourceClick = { },
             onShare = { },
             onBookmark = { }
         )

@@ -32,15 +32,17 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.hcpark.news.domain.model.Category
 import com.hcpark.news.domain.model.NewsArticle
-import com.hcpark.news.presentation.news.contract.NewsContract
+import com.hcpark.news.presentation.news.contract.NewsContract.Effect
 import com.hcpark.news.presentation.news.contract.NewsContract.Event
+import com.hcpark.news.presentation.news.contract.NewsContract.ModalState
 import com.hcpark.news.presentation.news.contract.NewsContract.State
 import com.hcpark.news.presentation.news.viewmodel.NewsViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun NewsScreen(
-    viewModel: NewsViewModel = hiltViewModel()
+    viewModel: NewsViewModel = hiltViewModel(),
+    navigate: (String) -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val lazyPagingArticle = viewModel.topHeadlinePagingDataFlow.collectAsLazyPagingItems()
@@ -52,13 +54,15 @@ fun NewsScreen(
     )
 
     LaunchedEffect(Unit) {
-        viewModel.effect.collectLatest {
-            //todo
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is Effect.Launch -> navigate(effect.route)
+            }
         }
     }
 
     when (state.modalState) {
-        NewsContract.ModalState.Dismiss -> Unit
+        is ModalState.Dismiss -> Unit
     }
 }
 
@@ -97,12 +101,13 @@ fun NewsScreenContent(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(count = lazyPagingArticle.itemCount) { position ->
-                    lazyPagingArticle[position]?.let {
+                    lazyPagingArticle[position]?.let { article ->
                         NewsCard(
-                            article = it,
-                            onClick = { emitEvent(Event.OnArticleClick(it)) },
-                            onShare = { emitEvent(Event.OnShareClick(it)) },
-                            onBookmark = { emitEvent(Event.OnBookmarkClick(it)) }
+                            article = article,
+                            onClick = { emitEvent(Event.OnArticleClick(article)) },
+                            onSourceClick = { emitEvent(Event.OnSourceClick(article.source)) },
+                            onShare = { emitEvent(Event.OnShareClick(article)) },
+                            onBookmark = { emitEvent(Event.OnBookmarkClick(article)) }
                         )
                     }
                 }

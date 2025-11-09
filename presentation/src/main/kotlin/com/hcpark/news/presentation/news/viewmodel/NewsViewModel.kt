@@ -7,10 +7,13 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.hcpark.news.domain.model.Category
 import com.hcpark.news.domain.model.NewsArticle
+import com.hcpark.news.domain.model.NewsSource
 import com.hcpark.news.domain.usecase.GetTopHeadlineArticlePagingSourceUseCase
 import com.hcpark.news.presentation.component.MVIViewModel
 import com.hcpark.news.presentation.main.navigation.MainRoute
-import com.hcpark.news.presentation.news.contract.NewsContract
+import com.hcpark.news.presentation.news.contract.NewsContract.Effect
+import com.hcpark.news.presentation.news.contract.NewsContract.Event
+import com.hcpark.news.presentation.news.contract.NewsContract.State
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -22,16 +25,20 @@ import javax.inject.Inject
 class NewsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getTopHeadlineArticlePagingSourceUseCase: GetTopHeadlineArticlePagingSourceUseCase
-) : MVIViewModel<NewsContract.Event, NewsContract.State, NewsContract.Effect>() {
+) : MVIViewModel<Event, State, Effect>() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val topHeadlinePagingDataFlow = uiState.map { it.category }
+    val topHeadlinePagingDataFlow = uiState
+        .map { it.category to it.sources }
         .distinctUntilChanged()
-        .flatMapLatest { category ->
+        .flatMapLatest { (category, sources) ->
             Pager(
                 config = PagingConfig(pageSize = 20),
                 pagingSourceFactory = {
-                    getTopHeadlineArticlePagingSourceUseCase(category = category)
+                    getTopHeadlineArticlePagingSourceUseCase(
+                        category = category,
+                        sources = sources
+                    )
                 }
             ).flow
         }.cachedIn(viewModelScope)
@@ -43,24 +50,31 @@ class NewsViewModel @Inject constructor(
     private fun init(savedStateHandle: SavedStateHandle) {
         val category = savedStateHandle.get<String>(MainRoute.CATEGORY)
             .let(Category::fromKey)
-        setState { copy(category = category) }
+        val sources = savedStateHandle.get<String>(MainRoute.SOURCES)
+            ?.takeIf { it != "null" }
+        setState { copy(category = category, sources = sources) }
     }
 
-    override fun createInitialState(): NewsContract.State {
-        return NewsContract.State()
+    override fun createInitialState(): State {
+        return State()
     }
 
-    override fun handleEvent(event: NewsContract.Event) {
+    override fun handleEvent(event: Event) {
         when (event) {
-            is NewsContract.Event.OnArticleClick -> openLink(event.article)
-            is NewsContract.Event.OnBookmarkClick -> toggleBookmark(event.article)
-            is NewsContract.Event.OnShareClick -> shareLink(event.article)
-            is NewsContract.Event.OnCategoryChange -> updateCategory(event.category)
+            is Event.OnArticleClick -> openLink(event.article)
+            is Event.OnSourceClick -> launchNews(event.source)
+            is Event.OnBookmarkClick -> toggleBookmark(event.article)
+            is Event.OnShareClick -> shareLink(event.article)
+            is Event.OnCategoryChange -> updateCategory(event.category)
         }
     }
 
     private fun openLink(article: NewsArticle) {
         //todo
+    }
+
+    private fun launchNews(source: NewsSource) {
+        setEffect(Effect.Launch(MainRoute.news(sources = source.id)))
     }
 
     private fun toggleBookmark(article: NewsArticle) {

@@ -33,16 +33,24 @@ fun MainNavigation() {
                 }
             )
         ) {
-            NewsScreen()
+            NewsScreen(
+                navigate = navController::navigate
+            )
         }
     }
 }
 
 object MainRoute {
-    fun news(category: Category? = null): String =
-        NEWS.replace("{$CATEGORY}", "${category?.key}")
+    fun news(
+        sources: String? = null,
+        category: Category? = null
+    ): String =
+        NEWS
+            .replace("{$SOURCES}", "$sources")
+            .replace("{$CATEGORY}", "${category?.key}")
 
     const val TOP20 = "top20"
-    const val NEWS = "news?category={category}"
+    const val NEWS = "news?sources={sources}&category={category}"
     const val CATEGORY = "category"
+    const val SOURCES = "sources"
 }

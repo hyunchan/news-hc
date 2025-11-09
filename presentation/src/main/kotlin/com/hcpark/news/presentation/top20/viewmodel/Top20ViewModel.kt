@@ -2,6 +2,7 @@ package com.hcpark.news.presentation.top20.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.hcpark.news.domain.model.NewsArticle
+import com.hcpark.news.domain.model.NewsSource
 import com.hcpark.news.domain.usecase.GetTopHeadlineArticlesUseCase
 import com.hcpark.news.presentation.component.MVIViewModel
 import com.hcpark.news.presentation.main.navigation.MainRoute
@@ -32,6 +33,7 @@ class Top20ViewModel @Inject constructor(
             is Event.OnDismissModal -> dismissModal()
             Event.OnMoreNewsClick -> launchNews()
             is Event.OnArticleClick -> openLink(event.article)
+            is Event.OnSourceClick -> launchNews(event.source)
             is Event.OnBookmarkClick -> toggleBookmark(event.article)
             is Event.OnShareClick -> share(event.article)
         }
@@ -52,8 +54,13 @@ class Top20ViewModel @Inject constructor(
     private fun dismissModal() {
         setModalState(ModalState.Dismiss)
     }
-    private fun launchNews(){
+
+    private fun launchNews() {
         setEffect(Effect.Launch(MainRoute.news()))
+    }
+
+    private fun launchNews(source: NewsSource) {
+        setEffect(Effect.Launch(MainRoute.news(sources = source.id)))
     }
 
     private fun openLink(article: NewsArticle) {

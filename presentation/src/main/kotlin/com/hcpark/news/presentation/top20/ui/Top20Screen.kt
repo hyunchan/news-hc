@@ -92,6 +92,7 @@ fun ViewScreenContent(
                 NewsCard(
                     article = article,
                     onClick = { emitEvent(Event.OnArticleClick(article)) },
+                    onSourceClick = { emitEvent(Event.OnSourceClick(article.source)) },
                     onShare = { emitEvent(Event.OnShareClick(article)) },
                     onBookmark = { emitEvent(Event.OnBookmarkClick(article)) }
                 )
