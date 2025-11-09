@@ -1,5 +1,6 @@
 package com.hcpark.news.domain.repository
 
+import androidx.paging.PagingSource
 import com.hcpark.news.domain.model.Category
 import com.hcpark.news.domain.model.Language
 import com.hcpark.news.domain.model.NewsArticle
@@ -11,6 +12,11 @@ interface NewsRepository {
         category: Category = Category.Default,
         size: Int = 20
     ): Result<List<NewsArticle>>
+
+    fun getTopHeadlineArticlePagingSource(
+        category: Category
+    ): PagingSource<Int, NewsArticle>
+
 
     suspend fun search(
         query: String,

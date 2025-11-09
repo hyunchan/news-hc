@@ -48,6 +48,8 @@ dependencies {
     implementation(libs.bundles.ktor)
     implementation(libs.napier)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.paging3.runtime)
 
+    ksp(libs.androidx.room.compiler)
     ksp(libs.hilt.compiler)
 }

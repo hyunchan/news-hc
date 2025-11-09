@@ -32,11 +32,8 @@ fun MainNavigation() {
                     defaultValue = null
                 }
             )
-        ) { backStackEntry ->
-            val category = backStackEntry.arguments
-                ?.getString(MainRoute.CATEGORY)
-                ?.let(Category::fromKey)
-            NewsScreen(category = category)
+        ) {
+            NewsScreen()
         }
     }
 }

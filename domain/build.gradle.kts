@@ -24,6 +24,7 @@ dependencies {
 
     implementation(libs.hilt.core)
     implementation(libs.napier)
+    implementation(libs.androidx.paging3.common)
 
     ksp(libs.hilt.compiler)
 

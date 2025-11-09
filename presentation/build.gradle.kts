@@ -56,6 +56,8 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.napier)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.paging3.runtime)
+    implementation(libs.androidx.paging3.compose)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.bundles.android.test)

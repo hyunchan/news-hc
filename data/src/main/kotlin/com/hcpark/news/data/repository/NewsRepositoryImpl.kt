@@ -1,6 +1,8 @@
 package com.hcpark.news.data.repository
 
+import androidx.paging.PagingSource
 import com.hcpark.news.data.mapper.ArticleDtoMapper
+import com.hcpark.news.data.remote.paging.TopHeadlinePagingSource
 import com.hcpark.news.data.remote.service.NewsApiService
 import com.hcpark.news.data.remote.util.callCatching
 import com.hcpark.news.domain.model.Category
@@ -22,6 +24,10 @@ class NewsRepositoryImpl @Inject constructor(
         apiService.getTopHeadlines(category = category, pageSize = size)
     }.mapCatching {
         it.articles.map(articleDtoMapper::invoke)
+    }
+
+    override fun getTopHeadlineArticlePagingSource(category: Category): PagingSource<Int, NewsArticle> {
+        return TopHeadlinePagingSource(apiService, articleDtoMapper, category)
     }
 
     override suspend fun search(

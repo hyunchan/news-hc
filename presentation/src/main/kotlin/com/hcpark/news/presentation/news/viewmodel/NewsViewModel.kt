@@ -1,21 +1,49 @@
 package com.hcpark.news.presentation.news.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
+import com.hcpark.news.domain.model.Category
 import com.hcpark.news.domain.model.NewsArticle
-import com.hcpark.news.domain.usecase.GetTopHeadlineArticlesUseCase
+import com.hcpark.news.domain.usecase.GetTopHeadlineArticlePagingSourceUseCase
 import com.hcpark.news.presentation.component.MVIViewModel
+import com.hcpark.news.presentation.main.navigation.MainRoute
 import com.hcpark.news.presentation.news.contract.NewsContract
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
 class NewsViewModel @Inject constructor(
-    private val getTopHeadlineArticlesUseCase: GetTopHeadlineArticlesUseCase
+    savedStateHandle: SavedStateHandle,
+    private val getTopHeadlineArticlePagingSourceUseCase: GetTopHeadlineArticlePagingSourceUseCase
 ) : MVIViewModel<NewsContract.Event, NewsContract.State, NewsContract.Effect>() {
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val topHeadlinePagingDataFlow = uiState.map { it.category }
+        .distinctUntilChanged()
+        .flatMapLatest { category ->
+            Pager(
+                config = PagingConfig(pageSize = 20),
+                pagingSourceFactory = {
+                    getTopHeadlineArticlePagingSourceUseCase(category = category)
+                }
+            ).flow
+        }.cachedIn(viewModelScope)
+
     init {
-        fetchTopHeadlines()
+        init(savedStateHandle)
+    }
+
+    private fun init(savedStateHandle: SavedStateHandle) {
+        val category = savedStateHandle.get<String>(MainRoute.CATEGORY)
+            .let(Category::fromKey)
+        setState { copy(category = category) }
     }
 
     override fun createInitialState(): NewsContract.State {
@@ -24,18 +52,9 @@ class NewsViewModel @Inject constructor(
 
     override fun handleEvent(event: NewsContract.Event) {
         when (event) {
-            NewsContract.Event.FetchTopHeadlines -> fetchTopHeadlines()
-            is NewsContract.Event.OnArticleClicked -> openLink(event.article)
-            is NewsContract.Event.OnBookmarkToggled -> toggleBookmark(event.article)
-            is NewsContract.Event.OnShareClicked -> shareLink(event.article)
-        }
-    }
-
-    private fun fetchTopHeadlines() = viewModelScope.launch {
-        getTopHeadlineArticlesUseCase().onSuccess {
-            setState { copy(topHeadlines = it) }
-        }.onFailure {
-            // todo error handling
+            is NewsContract.Event.OnArticleClick -> openLink(event.article)
+            is NewsContract.Event.OnBookmarkClick -> toggleBookmark(event.article)
+            is NewsContract.Event.OnShareClick -> shareLink(event.article)
         }
     }
 
