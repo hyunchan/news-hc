@@ -55,6 +55,7 @@ class NewsViewModel @Inject constructor(
             is NewsContract.Event.OnArticleClick -> openLink(event.article)
             is NewsContract.Event.OnBookmarkClick -> toggleBookmark(event.article)
             is NewsContract.Event.OnShareClick -> shareLink(event.article)
+            is NewsContract.Event.OnCategoryChange -> updateCategory(event.category)
         }
     }
 
@@ -68,5 +69,9 @@ class NewsViewModel @Inject constructor(
 
     private fun shareLink(article: NewsArticle) {
         //todo
+    }
+
+    private fun updateCategory(category: Category) {
+        setState { copy(category = category) }
     }
 }

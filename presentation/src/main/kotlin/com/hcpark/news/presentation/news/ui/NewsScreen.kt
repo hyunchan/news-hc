@@ -2,13 +2,20 @@ package com.hcpark.news.presentation.news.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -23,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.hcpark.news.domain.model.Category
 import com.hcpark.news.domain.model.NewsArticle
 import com.hcpark.news.presentation.news.contract.NewsContract
 import com.hcpark.news.presentation.news.contract.NewsContract.Event
@@ -68,30 +76,47 @@ fun NewsScreenContent(
             TopAppBar(title = { Text("News") })
         },
     ) { contentPadding ->
-        LazyColumn(
-            modifier = Modifier.padding(contentPadding),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(count = lazyPagingArticle.itemCount) { position ->
-                lazyPagingArticle[position]?.let {
-                    NewsCard(
-                        article = it,
-                        onClick = { emitEvent(Event.OnArticleClick(it)) },
-                        onShare = { emitEvent(Event.OnShareClick(it)) },
-                        onBookmark = { emitEvent(Event.OnBookmarkClick(it)) }
+        Column(modifier = Modifier.padding(contentPadding)) {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(Category.entries) { category ->
+                    FilterChip(
+                        selected = state.category == category,
+                        onClick = { emitEvent(Event.OnCategoryChange(category)) },
+                        label = { Text(text = category.name) }
                     )
                 }
             }
 
-            if (lazyPagingArticle.loadState.append is LoadState.Loading) {
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(count = lazyPagingArticle.itemCount) { position ->
+                    lazyPagingArticle[position]?.let {
+                        NewsCard(
+                            article = it,
+                            onClick = { emitEvent(Event.OnArticleClick(it)) },
+                            onShare = { emitEvent(Event.OnShareClick(it)) },
+                            onBookmark = { emitEvent(Event.OnBookmarkClick(it)) }
+                        )
+                    }
+                }
+
+                if (lazyPagingArticle.loadState.append is LoadState.Loading) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
                 }
             }

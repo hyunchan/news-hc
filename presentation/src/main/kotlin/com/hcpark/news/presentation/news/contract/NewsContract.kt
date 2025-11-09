@@ -16,6 +16,7 @@ object NewsContract {
         data class OnArticleClick(val article: NewsArticle) : Event
         data class OnShareClick(val article: NewsArticle) : Event
         data class OnBookmarkClick(val article: NewsArticle) : Event
+        data class OnCategoryChange(val category: Category) : Event
     }
 
     sealed interface Effect : UiEffect {
