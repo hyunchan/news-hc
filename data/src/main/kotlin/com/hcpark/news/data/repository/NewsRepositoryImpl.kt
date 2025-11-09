@@ -6,6 +6,7 @@ import com.hcpark.news.data.remote.paging.TopHeadlinePagingSource
 import com.hcpark.news.data.remote.service.NewsApiService
 import com.hcpark.news.data.remote.util.callCatching
 import com.hcpark.news.domain.model.Category
+import com.hcpark.news.domain.model.Country
 import com.hcpark.news.domain.model.Language
 import com.hcpark.news.domain.model.NewsArticle
 import com.hcpark.news.domain.model.SearchIn
@@ -18,16 +19,33 @@ class NewsRepositoryImpl @Inject constructor(
     private val articleDtoMapper: ArticleDtoMapper
 ) : NewsRepository {
     override suspend fun getTopHeadlineArticles(
-        category: Category,
+        country: Country?,
+        category: Category?,
+        sources: String?,
         size: Int
     ): Result<List<NewsArticle>> = callCatching {
-        apiService.getTopHeadlines(category = category, pageSize = size)
+        apiService.getTopHeadlines(
+            country = country,
+            category = category,
+            sources = sources,
+            pageSize = size
+        )
     }.mapCatching {
         it.articles.map(articleDtoMapper::invoke)
     }
 
-    override fun getTopHeadlineArticlePagingSource(category: Category): PagingSource<Int, NewsArticle> {
-        return TopHeadlinePagingSource(apiService, articleDtoMapper, category)
+    override fun getTopHeadlineArticlePagingSource(
+        country: Country?,
+        category: Category?,
+        sources: String?,
+    ): PagingSource<Int, NewsArticle> {
+        return TopHeadlinePagingSource(
+            apiService = apiService,
+            articleDtoMapper = articleDtoMapper,
+            country = country,
+            category = category,
+            sources = sources
+        )
     }
 
     override suspend fun search(

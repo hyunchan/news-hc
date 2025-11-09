@@ -16,18 +16,17 @@ import javax.inject.Inject
 class NewsApiService @Inject constructor(
     private val client: HttpClient
 ) {
-    /**
-     * @param country 국가 코드 (기본값: 미국), 무료 버전에서 기본값만 지원
-     */
     suspend fun getTopHeadlines(
-        country: Country = Country.Default,
-        category: Category = Category.Default,
+        country: Country?,
+        category: Category?,
+        sources: String?,
         page: Int = 1,
         pageSize: Int = 20
     ): TopHeadlinesResponse {
         return client.get("v2/top-headlines") {
-            parameter("country", country.key)
-            category.key?.let { parameter("category", it) }
+            country?.let { parameter("country", it.key) }
+            category?.key?.let { parameter("category", it) }
+            sources?.let { parameter("sources", it) }
             parameter("page", page)
             parameter("pageSize", pageSize)
         }.body()

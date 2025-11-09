@@ -6,12 +6,15 @@ import com.hcpark.news.data.mapper.ArticleDtoMapper
 import com.hcpark.news.data.remote.service.NewsApiService
 import com.hcpark.news.data.remote.util.callCatching
 import com.hcpark.news.domain.model.Category
+import com.hcpark.news.domain.model.Country
 import com.hcpark.news.domain.model.NewsArticle
 
 class TopHeadlinePagingSource(
     private val apiService: NewsApiService,
     private val articleDtoMapper: ArticleDtoMapper,
-    private val category: Category,
+    private val country: Country?,
+    private val category: Category?,
+    private val sources: String?,
     val pageSize: Int = 20
 ) : PagingSource<Int, NewsArticle>() {
     override fun getRefreshKey(state: PagingState<Int, NewsArticle>): Int? {
@@ -27,7 +30,9 @@ class TopHeadlinePagingSource(
             val response = apiService.getTopHeadlines(
                 page = page,
                 pageSize = pageSize,
-                category = category
+                country = country,
+                category = category,
+                sources = sources
             )
 
             val newsArticles = response.articles

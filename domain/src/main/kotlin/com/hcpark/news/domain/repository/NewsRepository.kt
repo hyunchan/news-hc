@@ -2,6 +2,7 @@ package com.hcpark.news.domain.repository
 
 import androidx.paging.PagingSource
 import com.hcpark.news.domain.model.Category
+import com.hcpark.news.domain.model.Country
 import com.hcpark.news.domain.model.Language
 import com.hcpark.news.domain.model.NewsArticle
 import com.hcpark.news.domain.model.SearchIn
@@ -9,12 +10,16 @@ import com.hcpark.news.domain.model.SortBy
 
 interface NewsRepository {
     suspend fun getTopHeadlineArticles(
-        category: Category = Category.Default,
+        country: Country? = null,
+        category: Category? = null,
+        sources: String? = null,
         size: Int = 20
     ): Result<List<NewsArticle>>
 
     fun getTopHeadlineArticlePagingSource(
-        category: Category
+        country: Country? = null,
+        category: Category? = null,
+        sources: String? = null,
     ): PagingSource<Int, NewsArticle>
 
 
