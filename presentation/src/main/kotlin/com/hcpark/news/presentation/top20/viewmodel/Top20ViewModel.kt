@@ -44,11 +44,13 @@ class Top20ViewModel @Inject constructor(
     }
 
     private fun fetch() = viewModelScope.launch {
+        setState { copy(isLoading = true, fetchError = null) }
         getTopHeadlineArticlesUseCase(size = 20).onSuccess {
             setState { copy(articles = it) }
         }.onFailure {
-            // todo
+            setState { copy(fetchError = it) }
         }
+        setState { copy(isLoading = false) }
     }
 
     private fun dismissModal() {

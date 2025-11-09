@@ -1,7 +1,6 @@
 package com.hcpark.news.presentation.news.ui
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,7 +21,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -32,6 +30,9 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.hcpark.news.domain.model.Category
 import com.hcpark.news.domain.model.NewsArticle
+import com.hcpark.news.presentation.common.ui.ErrorMessageBox
+import com.hcpark.news.presentation.common.ui.LoadingProgress
+import com.hcpark.news.presentation.common.ui.NewsCard
 import com.hcpark.news.presentation.news.contract.NewsContract.Effect
 import com.hcpark.news.presentation.news.contract.NewsContract.Event
 import com.hcpark.news.presentation.news.contract.NewsContract.ModalState
@@ -97,44 +98,54 @@ fun NewsScreenContent(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(count = lazyPagingArticle.itemCount) { position ->
-                    lazyPagingArticle[position]?.let { article ->
-                        NewsCard(
-                            article = article,
-                            onClick = { emitEvent(Event.OnArticleClick(article)) },
-                            onSourceClick = { emitEvent(Event.OnSourceClick(article.source)) },
-                            onShare = { emitEvent(Event.OnShareClick(article)) },
-                            onBookmark = { emitEvent(Event.OnBookmarkClick(article)) }
-                        )
-                    }
-                }
+            when (val refreshState = lazyPagingArticle.loadState.refresh) {
+                is LoadState.NotLoading -> {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(count = lazyPagingArticle.itemCount) { position ->
+                            lazyPagingArticle[position]?.let { article ->
+                                NewsCard(
+                                    article = article,
+                                    onClick = { emitEvent(Event.OnArticleClick(article)) },
+                                    onSourceClick = { emitEvent(Event.OnSourceClick(article.source)) },
+                                    onShare = { emitEvent(Event.OnShareClick(article)) },
+                                    onBookmark = { emitEvent(Event.OnBookmarkClick(article)) }
+                                )
+                            }
+                        }
 
-                if (lazyPagingArticle.loadState.append is LoadState.Loading) {
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            CircularProgressIndicator()
+                        if (lazyPagingArticle.loadState.append is LoadState.Loading) {
+                            item {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
 
-        if (lazyPagingArticle.loadState.refresh is LoadState.Loading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+                is LoadState.Loading -> {
+                    LoadingProgress(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(contentPadding),
+                    )
+                }
+
+                is LoadState.Error -> {
+                    ErrorMessageBox(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(contentPadding),
+                        refreshState.error.message
+                    )
+                }
             }
         }
     }

@@ -22,7 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.hcpark.news.presentation.news.ui.NewsCard
+import com.hcpark.news.presentation.common.ui.ErrorMessageBox
+import com.hcpark.news.presentation.common.ui.LoadingProgress
+import com.hcpark.news.presentation.common.ui.NewsCard
 import com.hcpark.news.presentation.top20.contract.Top20Contract.Effect
 import com.hcpark.news.presentation.top20.contract.Top20Contract.Event
 import com.hcpark.news.presentation.top20.contract.Top20Contract.ModalState
@@ -84,18 +86,39 @@ fun ViewScreenContent(
             }
         }
     ) { contentPadding ->
-        LazyColumn(
-            contentPadding = contentPadding,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(state.articles) { article ->
-                NewsCard(
-                    article = article,
-                    onClick = { emitEvent(Event.OnArticleClick(article)) },
-                    onSourceClick = { emitEvent(Event.OnSourceClick(article.source)) },
-                    onShare = { emitEvent(Event.OnShareClick(article)) },
-                    onBookmark = { emitEvent(Event.OnBookmarkClick(article)) }
+        when {
+            state.isLoading -> {
+                LoadingProgress(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding),
                 )
+            }
+
+            state.fetchError != null -> {
+                ErrorMessageBox(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding),
+                    message = state.fetchError.message
+                )
+            }
+
+            else -> {
+                LazyColumn(
+                    contentPadding = contentPadding,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(state.articles) { article ->
+                        NewsCard(
+                            article = article,
+                            onClick = { emitEvent(Event.OnArticleClick(article)) },
+                            onSourceClick = { emitEvent(Event.OnSourceClick(article.source)) },
+                            onShare = { emitEvent(Event.OnShareClick(article)) },
+                            onBookmark = { emitEvent(Event.OnBookmarkClick(article)) }
+                        )
+                    }
+                }
             }
         }
     }

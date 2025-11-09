@@ -9,6 +9,8 @@ import com.hcpark.news.presentation.component.UiState
 object Top20Contract {
     data class State(
         val modalState: ModalState = ModalState.Dismiss,
+        val isLoading: Boolean = false,
+        val fetchError: Throwable? = null,
         val articles: List<NewsArticle> = emptyList()
     ) : UiState
 

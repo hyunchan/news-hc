@@ -1,4 +1,4 @@
-package com.hcpark.news.presentation.news.ui
+package com.hcpark.news.presentation.common.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,7 +39,7 @@ fun NewsCard(
     onBookmark: () -> Unit
 ) {
     Card(
-        modifier = Modifier
+        modifier = Modifier.Companion
             .fillMaxWidth()
             .padding(16.dp)
             .clickable(onClick = onClick),
@@ -53,20 +53,20 @@ fun NewsCard(
             AsyncImage(
                 model = article.imageUrl,
                 contentDescription = null,
-                modifier = Modifier
+                modifier = Modifier.Companion
                     .fillMaxWidth()
                     .height(200.dp),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Companion.Crop
             )
 
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.Companion.padding(16.dp)) {
                 // Source Badge
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.Companion.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        modifier = Modifier.clickable(onClick = onSourceClick),
+                        modifier = Modifier.Companion.clickable(onClick = onSourceClick),
                         text = article.source.name,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary
@@ -79,27 +79,27 @@ fun NewsCard(
                 }
                 // Title
                 Text(
-                    modifier = Modifier.padding(top = 8.dp),
+                    modifier = Modifier.Companion.padding(top = 8.dp),
                     text = article.title,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Companion.Ellipsis
                 )
                 // Description
                 Text(
-                    modifier = Modifier.padding(top = 4.dp),
+                    modifier = Modifier.Companion.padding(top = 4.dp),
                     text = article.description,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
+                    overflow = TextOverflow.Companion.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.Companion.height(8.dp))
 
                 // Actions
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.Companion.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
                     IconButton(onClick = onShare) {
