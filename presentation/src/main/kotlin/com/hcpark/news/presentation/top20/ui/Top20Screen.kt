@@ -1,5 +1,6 @@
 package com.hcpark.news.presentation.top20.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,12 +20,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hcpark.news.presentation.common.ui.ErrorMessageBox
 import com.hcpark.news.presentation.common.ui.LoadingProgress
 import com.hcpark.news.presentation.common.ui.NewsCard
+import com.hcpark.news.presentation.theme.colorScheme
 import com.hcpark.news.presentation.top20.contract.Top20Contract.Effect
 import com.hcpark.news.presentation.top20.contract.Top20Contract.Event
 import com.hcpark.news.presentation.top20.contract.Top20Contract.ModalState
@@ -73,6 +77,14 @@ fun ViewScreenContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                colorScheme.secondary.copy(alpha = 0.8f)
+                            )
+                        )
+                    )
                     .navigationBarsPadding()
                     .padding(vertical = 16.dp),
                 contentAlignment = Alignment.Center
