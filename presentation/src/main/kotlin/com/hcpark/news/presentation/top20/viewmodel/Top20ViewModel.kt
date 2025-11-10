@@ -1,6 +1,7 @@
 package com.hcpark.news.presentation.top20.viewmodel
 
 import androidx.lifecycle.viewModelScope
+import com.hcpark.news.domain.model.Country
 import com.hcpark.news.domain.model.NewsArticle
 import com.hcpark.news.domain.model.NewsSource
 import com.hcpark.news.domain.usecase.GetTopHeadlineArticlesUseCase
@@ -45,7 +46,10 @@ class Top20ViewModel @Inject constructor(
 
     private fun fetch() = viewModelScope.launch {
         setState { copy(isLoading = true, fetchError = null) }
-        getTopHeadlineArticlesUseCase(size = 20).onSuccess {
+        getTopHeadlineArticlesUseCase(
+            country = Country.US,
+            size = 20
+        ).onSuccess {
             setState { copy(articles = it) }
         }.onFailure {
             setState { copy(fetchError = it) }
