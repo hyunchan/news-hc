@@ -124,7 +124,7 @@ private fun NewsCardPreview() {
         description = "Sample Description",
         url = "",
         imageUrl = "",
-        publishedAt = LocalDateTime.now(),
+        publishedAt = "a moment ago",
         content = "Sample Content"
     )
     MyApplicationTheme {

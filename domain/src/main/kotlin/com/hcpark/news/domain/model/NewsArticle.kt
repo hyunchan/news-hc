@@ -1,7 +1,5 @@
 package com.hcpark.news.domain.model
 
-import java.time.LocalDateTime
-
 data class NewsArticle(
     val source: NewsSource,
     val author: String,
@@ -9,6 +7,6 @@ data class NewsArticle(
     val description: String,
     val url: String,
     val imageUrl: String,
-    val publishedAt: LocalDateTime?,
+    val publishedAt: String,
     val content: String
 )

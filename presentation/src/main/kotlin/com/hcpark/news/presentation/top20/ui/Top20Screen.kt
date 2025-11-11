@@ -13,11 +13,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -42,10 +45,12 @@ fun Top20Screen(
     navigate: (String) -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
     val emitEvent: (Event) -> Unit = viewModel::setEvent
 
     ViewScreenContent(
         state = state,
+        snackbarHostState = snackbarHostState,
         emitEvent = emitEvent,
     )
 
@@ -53,6 +58,7 @@ fun Top20Screen(
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is Effect.Launch -> navigate(effect.route)
+                is Effect.Toast -> snackbarHostState.showSnackbar(effect.message)
             }
         }
     }
@@ -66,6 +72,7 @@ fun Top20Screen(
 @Composable
 fun ViewScreenContent(
     state: State,
+    snackbarHostState: SnackbarHostState,
     emitEvent: (Event) -> Unit,
 ) {
     Scaffold(
@@ -73,6 +80,7 @@ fun ViewScreenContent(
         topBar = {
             TopAppBar(title = { Text("Top 20 Headlines") })
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             Box(
                 modifier = Modifier

@@ -1,6 +1,8 @@
 package com.hcpark.news.data.di
 
+import com.hcpark.news.data.repository.BookmarkRepositoryImpl
 import com.hcpark.news.data.repository.NewsRepositoryImpl
+import com.hcpark.news.domain.repository.BookmarkRepository
 import com.hcpark.news.domain.repository.NewsRepository
 import dagger.Binds
 import dagger.Module
@@ -17,4 +19,10 @@ interface RepositoryModule {
     fun bindNewsRepository(
         newsRepositoryImpl: NewsRepositoryImpl
     ): NewsRepository
+
+    @Binds
+    @Singleton
+    fun bindBookmarkRepository(
+        bookmarkRepositoryImpl: BookmarkRepositoryImpl
+    ): BookmarkRepository
 }

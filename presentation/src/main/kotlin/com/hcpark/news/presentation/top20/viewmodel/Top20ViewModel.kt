@@ -5,6 +5,7 @@ import com.hcpark.news.domain.model.Country
 import com.hcpark.news.domain.model.NewsArticle
 import com.hcpark.news.domain.model.NewsSource
 import com.hcpark.news.domain.usecase.GetTopHeadlineArticlesUseCase
+import com.hcpark.news.domain.usecase.ToggleBookmarkNewsArticleUseCase
 import com.hcpark.news.presentation.component.MVIViewModel
 import com.hcpark.news.presentation.main.navigation.MainRoute
 import com.hcpark.news.presentation.top20.contract.Top20Contract.Effect
@@ -17,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class Top20ViewModel @Inject constructor(
-    private val getTopHeadlineArticlesUseCase: GetTopHeadlineArticlesUseCase
+    private val getTopHeadlineArticlesUseCase: GetTopHeadlineArticlesUseCase,
+    private val toggleBookmarkNewsArticleUseCase: ToggleBookmarkNewsArticleUseCase
 ) : MVIViewModel<Event, State, Effect>() {
 
     init {
@@ -73,8 +75,15 @@ class Top20ViewModel @Inject constructor(
         // todo
     }
 
-    private fun toggleBookmark(article: NewsArticle) {
-        // todo
+    private fun toggleBookmark(article: NewsArticle) = viewModelScope.launch {
+        toggleBookmarkNewsArticleUseCase(article).map {
+            if (it) "북마크가 추가되었습니다"
+            else "북마크가 해제되었습니다"
+        }.onSuccess {
+            setEffect(Effect.Toast(it))
+        }.onFailure {
+            setEffect(Effect.Toast("북마크 오류 : ${it.message}"))
+        }
     }
 
     private fun share(article: NewsArticle) {

@@ -9,6 +9,7 @@ import com.hcpark.news.domain.model.Category
 import com.hcpark.news.domain.model.NewsArticle
 import com.hcpark.news.domain.model.NewsSource
 import com.hcpark.news.domain.usecase.GetTopHeadlineArticlePagingSourceUseCase
+import com.hcpark.news.domain.usecase.ToggleBookmarkNewsArticleUseCase
 import com.hcpark.news.presentation.component.MVIViewModel
 import com.hcpark.news.presentation.main.navigation.MainRoute
 import com.hcpark.news.presentation.news.contract.NewsContract.Effect
@@ -19,12 +20,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class NewsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val getTopHeadlineArticlePagingSourceUseCase: GetTopHeadlineArticlePagingSourceUseCase
+    private val getTopHeadlineArticlePagingSourceUseCase: GetTopHeadlineArticlePagingSourceUseCase,
+    private val toggleBookmarkNewsArticleUseCase: ToggleBookmarkNewsArticleUseCase,
 ) : MVIViewModel<Event, State, Effect>() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -77,8 +80,15 @@ class NewsViewModel @Inject constructor(
         setEffect(Effect.Launch(MainRoute.news(sources = source.id)))
     }
 
-    private fun toggleBookmark(article: NewsArticle) {
-        //todo
+    private fun toggleBookmark(article: NewsArticle) = viewModelScope.launch {
+        toggleBookmarkNewsArticleUseCase(article).map {
+            if (it) "북마크가 추가되었습니다"
+            else "북마크가 해제되었습니다"
+        }.onSuccess { message ->
+            setEffect(Effect.Toast(message))
+        }.onFailure {
+            setEffect(Effect.Toast("북마크 오류 : ${it.message}"))
+        }
     }
 
     private fun shareLink(article: NewsArticle) {

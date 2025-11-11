@@ -13,7 +13,9 @@ import com.hcpark.news.domain.model.SearchIn
 import com.hcpark.news.domain.model.SortBy
 import com.hcpark.news.domain.repository.NewsRepository
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class NewsRepositoryImpl @Inject constructor(
     private val apiService: NewsApiService,
     private val articleDtoMapper: ArticleDtoMapper

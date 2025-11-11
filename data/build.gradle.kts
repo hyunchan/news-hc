@@ -46,6 +46,7 @@ dependencies {
 
     implementation(libs.hilt.android)
     implementation(libs.bundles.ktor)
+    implementation(libs.bundles.room)
     implementation(libs.napier)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.paging3.runtime)

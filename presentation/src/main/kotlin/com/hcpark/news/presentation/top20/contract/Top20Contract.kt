@@ -26,6 +26,7 @@ object Top20Contract {
 
     sealed class Effect : UiEffect {
         data class Launch(val route: String) : Effect()
+        data class Toast(val message: String) : Effect()
     }
 
     sealed class ModalState {

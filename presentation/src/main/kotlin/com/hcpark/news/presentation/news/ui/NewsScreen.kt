@@ -16,11 +16,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -47,10 +50,12 @@ fun NewsScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val lazyPagingArticle = viewModel.topHeadlinePagingDataFlow.collectAsLazyPagingItems()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     NewsScreenContent(
         state = state,
         lazyPagingArticle = lazyPagingArticle,
+        snackbarHostState = snackbarHostState,
         emitEvent = viewModel::setEvent
     )
 
@@ -58,6 +63,7 @@ fun NewsScreen(
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is Effect.Launch -> navigate(effect.route)
+                is Effect.Toast -> snackbarHostState.showSnackbar(effect.message)
             }
         }
     }
@@ -72,14 +78,15 @@ fun NewsScreen(
 fun NewsScreenContent(
     state: State,
     lazyPagingArticle: LazyPagingItems<NewsArticle>,
+    snackbarHostState: SnackbarHostState,
     emitEvent: (Event) -> Unit
 ) {
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(title = { Text("News") })
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { contentPadding ->
         Column(modifier = Modifier.padding(contentPadding)) {
             LazyRow(
