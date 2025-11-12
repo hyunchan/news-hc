@@ -7,6 +7,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.hcpark.news.domain.model.Category
+import com.hcpark.news.domain.model.Country
 import com.hcpark.news.domain.usecase.BookmarkUseCase
 import com.hcpark.news.domain.usecase.GetTopHeadlineArticlePagingSourceUseCase
 import com.hcpark.news.domain.usecase.ObserveBookmarkedUrlsUseCase
@@ -44,6 +45,7 @@ class NewsViewModel @Inject constructor(
                 config = PagingConfig(pageSize = 20),
                 pagingSourceFactory = {
                     getTopHeadlineArticlePagingSourceUseCase(
+                        country = if (sources == null) Country.US else null,
                         category = category,
                         sources = sources
                     )

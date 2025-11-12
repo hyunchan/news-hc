@@ -12,7 +12,9 @@ object NewsContract {
         val modalState: ModalState = ModalState.Dismiss,
         val category: Category = Category.Default,
         val sources: String? = null
-    ) : UiState
+    ) : UiState {
+        val filterVisible = sources == null
+    }
 
     sealed interface Event : UiEvent {
         data class OnArticleClick(val model: NewsCardModel) : Event

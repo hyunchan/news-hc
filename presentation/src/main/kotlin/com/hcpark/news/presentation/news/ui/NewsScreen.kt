@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -98,21 +96,23 @@ fun NewsScreenContent(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { contentPadding ->
         Column(modifier = Modifier.padding(contentPadding)) {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(Category.entries) { category ->
-                    FilterChip(
-                        selected = state.category == category,
-                        onClick = { emitEvent(Event.OnCategoryChange(category)) },
-                        label = { Text(text = category.name) }
-                    )
+            if (state.filterVisible) {
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(Category.entries) { category ->
+                        FilterChip(
+                            selected = state.category == category,
+                            onClick = { emitEvent(Event.OnCategoryChange(category)) },
+                            label = { Text(text = category.name) }
+                        )
+                    }
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             when (val refreshState = lazyPagingArticle.loadState.refresh) {
                 is LoadState.NotLoading -> {
