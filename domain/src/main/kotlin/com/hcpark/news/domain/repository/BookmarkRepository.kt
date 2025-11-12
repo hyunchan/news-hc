@@ -1,17 +1,19 @@
 package com.hcpark.news.domain.repository
 
 import androidx.paging.PagingData
-import com.hcpark.news.domain.model.NewsArticle
+import com.hcpark.news.domain.model.BookmarkedArticle
 import kotlinx.coroutines.flow.Flow
 
 interface BookmarkRepository {
-    suspend fun insert(newsArticle: NewsArticle): Result<Unit>
+    suspend fun insert(article: BookmarkedArticle): Result<Unit>
 
-    suspend fun delete(newsArticle: NewsArticle): Result<Unit>
+    suspend fun delete(url: String): Result<Unit>
 
-    fun observeNewsArticlePagingData(): Flow<PagingData<NewsArticle>>
+    fun pagingDataFlow(): Flow<PagingData<BookmarkedArticle>>
 
     suspend fun exists(url: String): Result<Boolean>
+
+    fun urls(): Flow<Set<String>>
 
     suspend fun clearAll(): Result<Unit>
 }

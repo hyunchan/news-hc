@@ -7,7 +7,7 @@ import androidx.paging.map
 import com.hcpark.news.data.database.dao.BookmarkedArticleDao
 import com.hcpark.news.data.mapper.BookmarkedArticleEntityMapper
 import com.hcpark.news.data.remote.util.callCatching
-import com.hcpark.news.domain.model.NewsArticle
+import com.hcpark.news.domain.model.BookmarkedArticle
 import com.hcpark.news.domain.repository.BookmarkRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -19,18 +19,18 @@ class BookmarkRepositoryImpl @Inject constructor(
     private val articleDao: BookmarkedArticleDao,
     private val bookmarkedArticleEntityMapper: BookmarkedArticleEntityMapper
 ) : BookmarkRepository {
-    override suspend fun insert(newsArticle: NewsArticle): Result<Unit> =
+    override suspend fun insert(article: BookmarkedArticle): Result<Unit> =
         callCatching {
-            articleDao.insert(bookmarkedArticleEntityMapper(newsArticle))
+            articleDao.insert(bookmarkedArticleEntityMapper(article))
         }
 
-    override suspend fun delete(newsArticle: NewsArticle): Result<Unit> =
+    override suspend fun delete(url: String): Result<Unit> =
         callCatching {
-            articleDao.delete(bookmarkedArticleEntityMapper(newsArticle))
+            articleDao.delete(url)
         }
 
 
-    override fun observeNewsArticlePagingData(): Flow<PagingData<NewsArticle>> =
+    override fun pagingDataFlow(): Flow<PagingData<BookmarkedArticle>> =
         Pager(
             config = PagingConfig(pageSize = 20),
             pagingSourceFactory = { articleDao.pagingSource() }
@@ -44,6 +44,9 @@ class BookmarkRepositoryImpl @Inject constructor(
         callCatching {
             articleDao.exists(url)
         }
+
+    override fun urls(): Flow<Set<String>> =
+        articleDao.urls().map { it.toSet() }
 
 
     override suspend fun clearAll(): Result<Unit> =

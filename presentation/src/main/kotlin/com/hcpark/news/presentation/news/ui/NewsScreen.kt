@@ -32,7 +32,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.hcpark.news.domain.model.Category
-import com.hcpark.news.domain.model.NewsArticle
+import com.hcpark.news.presentation.common.model.NewsCardModel
 import com.hcpark.news.presentation.common.ui.ErrorMessageBox
 import com.hcpark.news.presentation.common.ui.LoadingProgress
 import com.hcpark.news.presentation.common.ui.NewsCard
@@ -77,7 +77,7 @@ fun NewsScreen(
 @Composable
 fun NewsScreenContent(
     state: State,
-    lazyPagingArticle: LazyPagingItems<NewsArticle>,
+    lazyPagingArticle: LazyPagingItems<NewsCardModel>,
     snackbarHostState: SnackbarHostState,
     emitEvent: (Event) -> Unit
 ) {
@@ -111,13 +111,13 @@ fun NewsScreenContent(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(count = lazyPagingArticle.itemCount) { position ->
-                            lazyPagingArticle[position]?.let { article ->
+                            lazyPagingArticle[position]?.let { model ->
                                 NewsCard(
-                                    article = article,
-                                    onClick = { emitEvent(Event.OnArticleClick(article)) },
-                                    onSourceClick = { emitEvent(Event.OnSourceClick(article.source)) },
-                                    onShare = { emitEvent(Event.OnShareClick(article)) },
-                                    onBookmark = { emitEvent(Event.OnBookmarkClick(article)) }
+                                    model = model,
+                                    onClick = { emitEvent(Event.OnArticleClick(model)) },
+                                    onSourceClick = { emitEvent(Event.OnSourceClick(model)) },
+                                    onShare = { emitEvent(Event.OnShareClick(model)) },
+                                    onBookmark = { emitEvent(Event.OnBookmarkClick(model)) }
                                 )
                             }
                         }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
@@ -18,28 +19,31 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.hcpark.news.domain.model.NewsArticle
-import com.hcpark.news.domain.model.NewsSource
+import com.hcpark.news.presentation.common.model.NewsCardModel
 import com.hcpark.news.presentation.theme.MyApplicationTheme
 import com.hcpark.news.presentation.theme.colorScheme
-import java.time.LocalDateTime
 
 @Composable
 fun NewsCard(
-    article: NewsArticle,
+    model: NewsCardModel,
     onClick: () -> Unit,
     onSourceClick: () -> Unit,
     onShare: () -> Unit,
     onBookmark: () -> Unit
 ) {
     Card(
-        modifier = Modifier.Companion
+        modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
             .clickable(onClick = onClick),
@@ -51,62 +55,70 @@ fun NewsCard(
         Column {
             // Hero Image
             AsyncImage(
-                model = article.imageUrl,
+                model = model.imageUrl,
                 contentDescription = null,
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp),
-                contentScale = ContentScale.Companion.Crop
+                contentScale = ContentScale.Crop
             )
 
-            Column(modifier = Modifier.Companion.padding(16.dp)) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 // Source Badge
                 Row(
-                    modifier = Modifier.Companion.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        modifier = Modifier.Companion.clickable(onClick = onSourceClick),
-                        text = article.source.name,
+                        modifier = Modifier.clickable(onClick = onSourceClick),
+                        text = model.sourceName,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = article.publishedAt.toString(),
+                        text = model.publishedAt,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 // Title
                 Text(
-                    modifier = Modifier.Companion.padding(top = 8.dp),
-                    text = article.title,
+                    modifier = Modifier.padding(top = 8.dp),
+                    text = model.title,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 2,
-                    overflow = TextOverflow.Companion.Ellipsis
+                    overflow = TextOverflow.Ellipsis
                 )
                 // Description
                 Text(
-                    modifier = Modifier.Companion.padding(top = 4.dp),
-                    text = article.description,
+                    modifier = Modifier.padding(top = 4.dp),
+                    text = model.description,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 3,
-                    overflow = TextOverflow.Companion.Ellipsis,
+                    overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.Companion.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 // Actions
                 Row(
-                    modifier = Modifier.Companion.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
                     IconButton(onClick = onShare) {
                         Icon(Icons.Default.Share, contentDescription = "Share")
                     }
                     IconButton(onClick = onBookmark) {
-                        Icon(Icons.Default.BookmarkBorder, contentDescription = "Bookmark")
+                        Icon(
+                            imageVector =
+                                if (model.isBookmarked) Icons.Filled.Bookmark
+                                else Icons.Default.BookmarkBorder,
+                            contentDescription = "Bookmark",
+                            tint =
+                                if (model.isBookmarked) colorScheme.primary
+                                else Color.Unspecified
+                        )
                     }
                 }
             }
@@ -117,23 +129,29 @@ fun NewsCard(
 @Preview
 @Composable
 private fun NewsCardPreview() {
-    val article = NewsArticle(
-        source = NewsSource("", "Sample Source"),
-        author = "Sample Author",
-        title = "Sample Title",
-        description = "Sample Description",
-        url = "",
-        imageUrl = "",
-        publishedAt = "a moment ago",
-        content = "Sample Content"
-    )
+    var model by remember {
+        mutableStateOf(
+            NewsCardModel(
+                url = "",
+                imageUrl = "",
+                sourceId = null,
+                sourceName = "Sample Source",
+                title = "Sample Title",
+                description = "Sample Description",
+                publishedAt = "a moment ago",
+                isBookmarked = true
+            )
+        )
+    }
     MyApplicationTheme {
         NewsCard(
-            article = article,
+            model = model,
             onClick = { },
             onSourceClick = { },
             onShare = { },
-            onBookmark = { }
+            onBookmark = {
+                model = model.copy(isBookmarked = !model.isBookmarked)
+            }
         )
     }
 }

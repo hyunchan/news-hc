@@ -2,11 +2,13 @@ package com.hcpark.news.presentation.top20.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.hcpark.news.domain.model.Country
-import com.hcpark.news.domain.model.NewsArticle
-import com.hcpark.news.domain.model.NewsSource
+import com.hcpark.news.domain.usecase.BookmarkUseCase
 import com.hcpark.news.domain.usecase.GetTopHeadlineArticlesUseCase
-import com.hcpark.news.domain.usecase.ToggleBookmarkNewsArticleUseCase
+import com.hcpark.news.domain.usecase.ObserveBookmarkedUrlsUseCase
+import com.hcpark.news.domain.usecase.UnbookmarkUseCase
+import com.hcpark.news.presentation.common.model.NewsCardModel
 import com.hcpark.news.presentation.component.MVIViewModel
+import com.hcpark.news.presentation.component.asResource
 import com.hcpark.news.presentation.main.navigation.MainRoute
 import com.hcpark.news.presentation.top20.contract.Top20Contract.Effect
 import com.hcpark.news.presentation.top20.contract.Top20Contract.Event
@@ -19,11 +21,24 @@ import javax.inject.Inject
 @HiltViewModel
 class Top20ViewModel @Inject constructor(
     private val getTopHeadlineArticlesUseCase: GetTopHeadlineArticlesUseCase,
-    private val toggleBookmarkNewsArticleUseCase: ToggleBookmarkNewsArticleUseCase
+    private val observeBookmarkedUrlsUseCase: ObserveBookmarkedUrlsUseCase,
+    private val bookmarkUseCase: BookmarkUseCase,
+    private val unbookmarkUseCase: UnbookmarkUseCase,
 ) : MVIViewModel<Event, State, Effect>() {
 
     init {
+        observes()
         fetch()
+    }
+
+    private fun observes() = viewModelScope.launch {
+        observeBookmarkedUrlsUseCase().asResource().collect { resource ->
+            resource.success {
+                setState { copy(bookmarkedUrls = it) }
+            }.failure {
+                setState { copy(bookmarkedUrls = emptySet()) }
+            }
+        }
     }
 
     override fun createInitialState(): State {
@@ -35,10 +50,10 @@ class Top20ViewModel @Inject constructor(
             is Event.OnRefresh -> fetch()
             is Event.OnDismissModal -> dismissModal()
             Event.OnMoreNewsClick -> launchNews()
-            is Event.OnArticleClick -> openLink(event.article)
-            is Event.OnSourceClick -> launchNews(event.source)
-            is Event.OnBookmarkClick -> toggleBookmark(event.article)
-            is Event.OnShareClick -> share(event.article)
+            is Event.OnArticleClick -> openLink(event.model)
+            is Event.OnSourceClick -> launchNews(event.model)
+            is Event.OnBookmarkClick -> toggleBookmark(event.model)
+            is Event.OnShareClick -> share(event.model)
         }
     }
 
@@ -67,18 +82,31 @@ class Top20ViewModel @Inject constructor(
         setEffect(Effect.Launch(MainRoute.news()))
     }
 
-    private fun launchNews(source: NewsSource) {
-        setEffect(Effect.Launch(MainRoute.news(sources = source.id)))
+    private fun launchNews(model: NewsCardModel) {
+        setEffect(Effect.Launch(MainRoute.news(sources = model.sourceId)))
     }
 
-    private fun openLink(article: NewsArticle) {
+    private fun openLink(model: NewsCardModel) {
         // todo
     }
 
-    private fun toggleBookmark(article: NewsArticle) = viewModelScope.launch {
-        toggleBookmarkNewsArticleUseCase(article).map {
-            if (it) "북마크가 추가되었습니다"
-            else "북마크가 해제되었습니다"
+    private fun toggleBookmark(model: NewsCardModel) = viewModelScope.launch {
+        runCatching {
+            if (model.isBookmarked) {
+                unbookmarkUseCase(model.url).getOrThrow()
+                "북마크가 해제되었습니다"
+            } else {
+                bookmarkUseCase(
+                    url = model.url,
+                    title = model.title,
+                    description = model.description,
+                    imageUrl = model.imageUrl,
+                    sourceId = model.sourceId,
+                    sourceName = model.sourceName,
+                    publishedAt = model.publishedAt
+                ).getOrThrow()
+                "북마크가 추가되었습니다"
+            }
         }.onSuccess {
             setEffect(Effect.Toast(it))
         }.onFailure {
@@ -86,7 +114,7 @@ class Top20ViewModel @Inject constructor(
         }
     }
 
-    private fun share(article: NewsArticle) {
+    private fun share(model: NewsCardModel) {
         // todo
     }
 }

@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.hcpark.news.presentation.common.model.NewsCardModel
 import com.hcpark.news.presentation.common.ui.ErrorMessageBox
 import com.hcpark.news.presentation.common.ui.LoadingProgress
 import com.hcpark.news.presentation.common.ui.NewsCard
@@ -75,6 +77,16 @@ fun ViewScreenContent(
     snackbarHostState: SnackbarHostState,
     emitEvent: (Event) -> Unit,
 ) {
+    val entries by remember(state.articles, state.bookmarkedUrls) {
+        derivedStateOf {
+            state.articles.map { article ->
+                NewsCardModel(
+                    article,
+                    state.bookmarkedUrls.contains(article.url)
+                )
+            }
+        }
+    }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -129,13 +141,13 @@ fun ViewScreenContent(
                     contentPadding = contentPadding,
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(state.articles) { article ->
+                    items(entries) { model ->
                         NewsCard(
-                            article = article,
-                            onClick = { emitEvent(Event.OnArticleClick(article)) },
-                            onSourceClick = { emitEvent(Event.OnSourceClick(article.source)) },
-                            onShare = { emitEvent(Event.OnShareClick(article)) },
-                            onBookmark = { emitEvent(Event.OnBookmarkClick(article)) }
+                            model = model,
+                            onClick = { emitEvent(Event.OnArticleClick(model)) },
+                            onSourceClick = { emitEvent(Event.OnSourceClick(model)) },
+                            onShare = { emitEvent(Event.OnShareClick(model)) },
+                            onBookmark = { emitEvent(Event.OnBookmarkClick(model)) }
                         )
                     }
                 }

@@ -9,10 +9,8 @@ data class BookmarkedArticleEntity(
     val url: String,
     val sourceId: String?,
     val sourceName: String,
-    val author: String,
     val title: String,
     val description: String,
     val imageUrl: String,
-    val publishedAt: String,
-    val content: String
+    val publishedAt: String
 )

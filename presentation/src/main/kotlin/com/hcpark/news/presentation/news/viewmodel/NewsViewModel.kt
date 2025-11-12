@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
+import androidx.paging.map
 import com.hcpark.news.domain.model.Category
-import com.hcpark.news.domain.model.NewsArticle
-import com.hcpark.news.domain.model.NewsSource
+import com.hcpark.news.domain.usecase.BookmarkUseCase
 import com.hcpark.news.domain.usecase.GetTopHeadlineArticlePagingSourceUseCase
-import com.hcpark.news.domain.usecase.ToggleBookmarkNewsArticleUseCase
+import com.hcpark.news.domain.usecase.ObserveBookmarkedUrlsUseCase
+import com.hcpark.news.domain.usecase.UnbookmarkUseCase
+import com.hcpark.news.presentation.common.model.NewsCardModel
 import com.hcpark.news.presentation.component.MVIViewModel
 import com.hcpark.news.presentation.main.navigation.MainRoute
 import com.hcpark.news.presentation.news.contract.NewsContract.Effect
@@ -17,6 +19,7 @@ import com.hcpark.news.presentation.news.contract.NewsContract.Event
 import com.hcpark.news.presentation.news.contract.NewsContract.State
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -27,7 +30,9 @@ import javax.inject.Inject
 class NewsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getTopHeadlineArticlePagingSourceUseCase: GetTopHeadlineArticlePagingSourceUseCase,
-    private val toggleBookmarkNewsArticleUseCase: ToggleBookmarkNewsArticleUseCase,
+    private val observeBookmarkedUrlsUseCase: ObserveBookmarkedUrlsUseCase,
+    private val bookmarkUseCase: BookmarkUseCase,
+    private val unbookmarkUseCase: UnbookmarkUseCase,
 ) : MVIViewModel<Event, State, Effect>() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -43,8 +48,13 @@ class NewsViewModel @Inject constructor(
                         sources = sources
                     )
                 }
-            ).flow
-        }.cachedIn(viewModelScope)
+            ).flow.cachedIn(viewModelScope)
+                .combine(observeBookmarkedUrlsUseCase()) { pagingData, bookmarkedUrls ->
+                    pagingData.map { article ->
+                        NewsCardModel(article, bookmarkedUrls.contains(article.url))
+                    }
+                }
+        }
 
     init {
         init(savedStateHandle)
@@ -64,34 +74,47 @@ class NewsViewModel @Inject constructor(
 
     override fun handleEvent(event: Event) {
         when (event) {
-            is Event.OnArticleClick -> openLink(event.article)
-            is Event.OnSourceClick -> launchNews(event.source)
-            is Event.OnBookmarkClick -> toggleBookmark(event.article)
-            is Event.OnShareClick -> shareLink(event.article)
+            is Event.OnArticleClick -> openLink(event.model)
+            is Event.OnSourceClick -> launchNews(event.model)
+            is Event.OnBookmarkClick -> toggleBookmark(event.model)
+            is Event.OnShareClick -> shareLink(event.model)
             is Event.OnCategoryChange -> updateCategory(event.category)
         }
     }
 
-    private fun openLink(article: NewsArticle) {
+    private fun openLink(model: NewsCardModel) {
         //todo
     }
 
-    private fun launchNews(source: NewsSource) {
-        setEffect(Effect.Launch(MainRoute.news(sources = source.id)))
+    private fun launchNews(model: NewsCardModel) {
+        setEffect(Effect.Launch(MainRoute.news(sources = model.sourceId)))
     }
 
-    private fun toggleBookmark(article: NewsArticle) = viewModelScope.launch {
-        toggleBookmarkNewsArticleUseCase(article).map {
-            if (it) "북마크가 추가되었습니다"
-            else "북마크가 해제되었습니다"
-        }.onSuccess { message ->
-            setEffect(Effect.Toast(message))
+    private fun toggleBookmark(model: NewsCardModel) = viewModelScope.launch {
+        runCatching {
+            if (model.isBookmarked) {
+                unbookmarkUseCase(model.url).getOrThrow()
+                "북마크가 해제되었습니다"
+            } else {
+                bookmarkUseCase(
+                    url = model.url,
+                    title = model.title,
+                    description = model.description,
+                    imageUrl = model.imageUrl,
+                    sourceId = model.sourceId,
+                    sourceName = model.sourceName,
+                    publishedAt = model.publishedAt
+                ).getOrThrow()
+                "북마크가 추가되었습니다"
+            }
+        }.onSuccess {
+            setEffect(Effect.Toast(it))
         }.onFailure {
             setEffect(Effect.Toast("북마크 오류 : ${it.message}"))
         }
     }
 
-    private fun shareLink(article: NewsArticle) {
+    private fun shareLink(model: NewsCardModel) {
         //todo
     }
 
