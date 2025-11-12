@@ -1,5 +1,6 @@
 package com.hcpark.news.presentation.news.ui
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,6 +54,12 @@ fun NewsScreen(
     val lazyPagingArticle = viewModel.topHeadlinePagingDataFlow.collectAsLazyPagingItems()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val context = LocalContext.current
+
+    fun startActivity(intent: Intent) {
+        context.startActivity(intent)
+    }
+
     NewsScreenContent(
         state = state,
         lazyPagingArticle = lazyPagingArticle,
@@ -64,6 +72,7 @@ fun NewsScreen(
             when (effect) {
                 is Effect.Launch -> navigate(effect.route)
                 is Effect.Toast -> snackbarHostState.showSnackbar(effect.message)
+                is Effect.LaunchIntent -> startActivity(effect.intent)
             }
         }
     }

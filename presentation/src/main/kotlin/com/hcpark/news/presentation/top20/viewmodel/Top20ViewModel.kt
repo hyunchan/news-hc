@@ -1,5 +1,7 @@
 package com.hcpark.news.presentation.top20.viewmodel
 
+import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import com.hcpark.news.domain.model.Country
 import com.hcpark.news.domain.usecase.BookmarkUseCase
@@ -87,7 +89,10 @@ class Top20ViewModel @Inject constructor(
     }
 
     private fun openLink(model: NewsCardModel) {
-        // todo
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse(model.url)
+        }
+        setEffect(Effect.LaunchIntent(intent))
     }
 
     private fun toggleBookmark(model: NewsCardModel) = viewModelScope.launch {

@@ -1,5 +1,7 @@
 package com.hcpark.news.presentation.news.viewmodel
 
+import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -83,7 +85,10 @@ class NewsViewModel @Inject constructor(
     }
 
     private fun openLink(model: NewsCardModel) {
-        //todo
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse(model.url)
+        }
+        setEffect(Effect.LaunchIntent(intent))
     }
 
     private fun launchNews(model: NewsCardModel) {

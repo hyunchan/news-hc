@@ -1,5 +1,6 @@
 package com.hcpark.news.presentation.top20.ui
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -50,7 +52,13 @@ fun Top20Screen(
     val snackbarHostState = remember { SnackbarHostState() }
     val emitEvent: (Event) -> Unit = viewModel::setEvent
 
-    ViewScreenContent(
+    val context = LocalContext.current
+
+    fun startActivity(intent: Intent) {
+        context.startActivity(intent)
+    }
+
+    Top20ScreenContent(
         state = state,
         snackbarHostState = snackbarHostState,
         emitEvent = emitEvent,
@@ -61,6 +69,7 @@ fun Top20Screen(
             when (effect) {
                 is Effect.Launch -> navigate(effect.route)
                 is Effect.Toast -> snackbarHostState.showSnackbar(effect.message)
+                is Effect.LaunchIntent -> startActivity(effect.intent)
             }
         }
     }
@@ -72,7 +81,7 @@ fun Top20Screen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ViewScreenContent(
+fun Top20ScreenContent(
     state: State,
     snackbarHostState: SnackbarHostState,
     emitEvent: (Event) -> Unit,

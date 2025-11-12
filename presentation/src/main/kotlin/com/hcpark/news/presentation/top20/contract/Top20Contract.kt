@@ -1,5 +1,6 @@
 package com.hcpark.news.presentation.top20.contract
 
+import android.content.Intent
 import com.hcpark.news.domain.model.NewsArticle
 import com.hcpark.news.presentation.common.model.NewsCardModel
 import com.hcpark.news.presentation.component.UiEffect
@@ -28,6 +29,7 @@ object Top20Contract {
     sealed class Effect : UiEffect {
         data class Launch(val route: String) : Effect()
         data class Toast(val message: String) : Effect()
+        data class LaunchIntent(val intent: Intent) : Effect()
     }
 
     sealed class ModalState {
