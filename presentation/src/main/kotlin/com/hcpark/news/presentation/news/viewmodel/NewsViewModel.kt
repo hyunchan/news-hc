@@ -1,7 +1,5 @@
 package com.hcpark.news.presentation.news.viewmodel
 
-import android.content.Intent
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -79,16 +77,13 @@ class NewsViewModel @Inject constructor(
             is Event.OnArticleClick -> openLink(event.model)
             is Event.OnSourceClick -> launchNews(event.model)
             is Event.OnBookmarkClick -> toggleBookmark(event.model)
-            is Event.OnShareClick -> shareLink(event.model)
+            is Event.OnShareClick -> share(event.model)
             is Event.OnCategoryChange -> updateCategory(event.category)
         }
     }
 
     private fun openLink(model: NewsCardModel) {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(model.url)
-        }
-        setEffect(Effect.LaunchIntent(intent))
+        setEffect(Effect.LaunchIntent(model.viewIntent()))
     }
 
     private fun launchNews(model: NewsCardModel) {
@@ -119,8 +114,8 @@ class NewsViewModel @Inject constructor(
         }
     }
 
-    private fun shareLink(model: NewsCardModel) {
-        //todo
+    private fun share(model: NewsCardModel) {
+        setEffect(Effect.LaunchIntent(model.shareIntent()))
     }
 
     private fun updateCategory(category: Category) {

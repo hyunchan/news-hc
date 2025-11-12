@@ -1,5 +1,7 @@
 package com.hcpark.news.presentation.common.model
 
+import android.content.Intent
+import android.net.Uri
 import com.hcpark.news.domain.model.BookmarkedArticle
 import com.hcpark.news.domain.model.NewsArticle
 import com.hcpark.news.presentation.component.DateTimeUtil
@@ -41,6 +43,21 @@ data class NewsCardModel(
         description = bookmarkedArticle.description,
         isBookmarked = true
     )
+
+    fun viewIntent(): Intent {
+        return Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse(url)
+        }
+    }
+
+    fun shareIntent(): Intent {
+        return Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, url)
+        }.let {
+            Intent.createChooser(it, title)
+        }
+    }
 
     companion object {
         private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
