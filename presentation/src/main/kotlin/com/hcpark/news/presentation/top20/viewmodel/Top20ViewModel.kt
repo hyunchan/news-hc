@@ -47,6 +47,7 @@ class Top20ViewModel @Inject constructor(
 
     override fun handleEvent(event: Event) {
         when (event) {
+            Event.OnBookmarkedListClick -> launchBookmarked()
             is Event.OnRefresh -> fetch()
             is Event.OnDismissModal -> dismissModal()
             Event.OnMoreNewsClick -> launchNews()
@@ -59,6 +60,10 @@ class Top20ViewModel @Inject constructor(
 
     private fun setModalState(modalState: ModalState) {
         setState { copy(modalState = modalState) }
+    }
+
+    private fun launchBookmarked() {
+        setEffect(Effect.Launch(MainRoute.bookmarked()))
     }
 
     private fun fetch() = viewModelScope.launch {

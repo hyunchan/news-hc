@@ -1,30 +1,25 @@
-package com.hcpark.news.presentation.top20.contract
+package com.hcpark.news.presentation.bookmarked.contract
 
 import android.content.Intent
-import com.hcpark.news.domain.model.NewsArticle
+import com.hcpark.news.domain.model.BookmarkedArticle
 import com.hcpark.news.presentation.common.model.NewsCardModel
 import com.hcpark.news.presentation.component.UiEffect
 import com.hcpark.news.presentation.component.UiEvent
 import com.hcpark.news.presentation.component.UiState
 
-object Top20Contract {
+object BookmarkedContract {
     data class State(
-        val modalState: ModalState = ModalState.Dismiss,
+        val articles: List<BookmarkedArticle> = emptyList(),
         val isLoading: Boolean = false,
         val fetchError: Throwable? = null,
-        val articles: List<NewsArticle> = emptyList(),
-        val bookmarkedUrls: Set<String> = emptySet()
+        val modalState: ModalState = ModalState.None,
     ) : UiState
 
     sealed class Event : UiEvent {
-        data object OnBookmarkedListClick : Event()
-        data object OnRefresh : Event()
-        data object OnDismissModal : Event()
-        data object OnMoreNewsClick : Event()
+        data object OnModalDismiss : Event()
         data class OnArticleClick(val model: NewsCardModel) : Event()
-        data class OnSourceClick(val model: NewsCardModel) : Event()
-        data class OnShareClick(val model: NewsCardModel) : Event()
         data class OnBookmarkClick(val model: NewsCardModel) : Event()
+        data class OnShareClick(val model: NewsCardModel) : Event()
     }
 
     sealed class Effect : UiEffect {
@@ -34,6 +29,6 @@ object Top20Contract {
     }
 
     sealed class ModalState {
-        data object Dismiss : ModalState()
+        data object None : ModalState()
     }
 }

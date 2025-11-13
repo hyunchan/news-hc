@@ -40,6 +40,7 @@ import com.hcpark.news.presentation.theme.colorScheme
 
 @Composable
 fun NewsCard(
+    modifier: Modifier = Modifier,
     model: NewsCardModel,
     onClick: () -> Unit,
     onSourceClick: () -> Unit,
@@ -47,7 +48,7 @@ fun NewsCard(
     onBookmark: () -> Unit
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
             .clickable(onClick = onClick),
