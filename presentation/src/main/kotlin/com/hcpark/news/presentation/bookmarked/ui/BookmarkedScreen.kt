@@ -82,57 +82,55 @@ fun BookmarkedScreenContent(
         }
     ) { contentPadding ->
         Box(modifier = Modifier.padding(contentPadding)) {
-            when (val refreshState = lazyPagingArticle.loadState.refresh) {
-                is LoadState.NotLoading -> {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(
-                            count = lazyPagingArticle.itemCount,
-                            key = { lazyPagingArticle[it]?.url ?: Unit }
-                        ) { position ->
-                            lazyPagingArticle[position]?.let { model ->
-                                NewsCard(
-                                    model = model,
-                                    onClick = { emitEvent(Event.OnArticleClick(model)) },
-                                    onSourceClick = { },
-                                    onShare = { emitEvent(Event.OnShareClick(model)) },
-                                    onBookmark = { emitEvent(Event.OnBookmarkClick(model)) }
-                                )
-                            }
-                        }
+            val refreshState = lazyPagingArticle.loadState.refresh
 
-                        if (lazyPagingArticle.loadState.append is LoadState.Loading) {
-                            item {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    CircularProgressIndicator()
-                                }
-                            }
-                        }
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                if (refreshState is LoadState.Error) {
+                    item {
+                        ErrorMessageBox(
+                            modifier = Modifier.fillMaxSize(),
+                            refreshState.error.message
+                        )
+                    }
+                }
+                items(
+                    count = lazyPagingArticle.itemCount,
+                    key = { lazyPagingArticle[it]?.url ?: Unit }
+                ) { position ->
+                    lazyPagingArticle[position]?.let { model ->
+                        NewsCard(
+                            modifier = Modifier.animateItem(),
+                            model = model,
+                            onClick = { emitEvent(Event.OnArticleClick(model)) },
+                            onSourceClick = { },
+                            onShare = { emitEvent(Event.OnShareClick(model)) },
+                            onBookmark = { emitEvent(Event.OnBookmarkClick(model)) }
+                        )
                     }
                 }
 
-                is LoadState.Loading -> {
-                    LoadingProgress(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(contentPadding),
-                    )
+                if (lazyPagingArticle.loadState.append is LoadState.Loading) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
                 }
+            }
 
-                is LoadState.Error -> {
-                    ErrorMessageBox(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(contentPadding),
-                        refreshState.error.message
-                    )
-                }
+            if (refreshState is LoadState.Loading) {
+                LoadingProgress(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding),
+                )
             }
         }
     }

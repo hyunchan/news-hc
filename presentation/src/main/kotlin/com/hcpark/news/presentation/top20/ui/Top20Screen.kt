@@ -93,10 +93,8 @@ fun Top20ScreenContent(
     val entries by remember(state.articles, state.bookmarkedUrls) {
         derivedStateOf {
             state.articles.map { article ->
-                NewsCardModel(
-                    article,
-                    state.bookmarkedUrls.contains(article.url)
-                )
+                val isBookmarked = state.bookmarkedUrls.contains(article.url)
+                NewsCardModel(article, isBookmarked)
             }
         }
     }
@@ -141,40 +139,32 @@ fun Top20ScreenContent(
             }
         }
     ) { contentPadding ->
-        when {
-            state.isLoading -> {
-                LoadingProgress(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(contentPadding),
-                )
-            }
-
-            state.fetchError != null -> {
+        LazyColumn(
+            contentPadding = contentPadding,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (state.fetchError != null) item {
                 ErrorMessageBox(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(contentPadding),
+                    modifier = Modifier.fillMaxSize(),
                     message = state.fetchError.message
                 )
             }
-
-            else -> {
-                LazyColumn(
-                    contentPadding = contentPadding,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(entries) { model ->
-                        NewsCard(
-                            model = model,
-                            onClick = { emitEvent(Event.OnArticleClick(model)) },
-                            onSourceClick = { emitEvent(Event.OnSourceClick(model)) },
-                            onShare = { emitEvent(Event.OnShareClick(model)) },
-                            onBookmark = { emitEvent(Event.OnBookmarkClick(model)) }
-                        )
-                    }
-                }
+            items(entries) { model ->
+                NewsCard(
+                    model = model,
+                    onClick = { emitEvent(Event.OnArticleClick(model)) },
+                    onSourceClick = { emitEvent(Event.OnSourceClick(model)) },
+                    onShare = { emitEvent(Event.OnShareClick(model)) },
+                    onBookmark = { emitEvent(Event.OnBookmarkClick(model)) }
+                )
             }
+        }
+        if (state.isLoading) {
+            LoadingProgress(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding),
+            )
         }
     }
 }

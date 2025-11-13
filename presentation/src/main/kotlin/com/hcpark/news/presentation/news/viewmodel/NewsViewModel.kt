@@ -38,7 +38,7 @@ class NewsViewModel @Inject constructor(
 ) : MVIViewModel<Event, State, Effect>() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val topHeadlinePagingDataFlow = uiState
+    val pagingModel = uiState
         .map { it.category to it.sources }
         .distinctUntilChanged()
         .flatMapLatest { (category, sources) ->

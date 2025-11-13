@@ -55,7 +55,7 @@ fun NewsScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val emitEvent = viewModel::setEvent
-    val lazyPagingArticle = viewModel.topHeadlinePagingDataFlow.collectAsLazyPagingItems()
+    val lazyPagingModel = viewModel.pagingModel.collectAsLazyPagingItems()
     val snackbarHostState = remember { SnackbarHostState() }
 
     val context = LocalContext.current
@@ -66,7 +66,7 @@ fun NewsScreen(
 
     NewsScreenContent(
         state = state,
-        lazyPagingArticle = lazyPagingArticle,
+        lazyPagingModel = lazyPagingModel,
         snackbarHostState = snackbarHostState,
         emitEvent = viewModel::setEvent
     )
@@ -97,7 +97,7 @@ fun NewsScreen(
 @Composable
 fun NewsScreenContent(
     state: State,
-    lazyPagingArticle: LazyPagingItems<NewsCardModel>,
+    lazyPagingModel: LazyPagingItems<NewsCardModel>,
     snackbarHostState: SnackbarHostState,
     emitEvent: (Event) -> Unit
 ) {
@@ -119,6 +119,8 @@ fun NewsScreenContent(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { contentPadding ->
+        val refreshState = lazyPagingModel.loadState.refresh
+
         Column(modifier = Modifier.padding(contentPadding)) {
             if (state.filterVisible) {
                 LazyRow(
@@ -138,55 +140,51 @@ fun NewsScreenContent(
                 }
             }
 
-            when (val refreshState = lazyPagingArticle.loadState.refresh) {
-                is LoadState.NotLoading -> {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(count = lazyPagingArticle.itemCount) { position ->
-                            lazyPagingArticle[position]?.let { model ->
-                                NewsCard(
-                                    model = model,
-                                    onClick = { emitEvent(Event.OnArticleClick(model)) },
-                                    onSourceClick = { emitEvent(Event.OnSourceClick(model)) },
-                                    onShare = { emitEvent(Event.OnShareClick(model)) },
-                                    onBookmark = { emitEvent(Event.OnBookmarkClick(model)) }
-                                )
-                            }
-                        }
-
-                        if (lazyPagingArticle.loadState.append is LoadState.Loading) {
-                            item {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    CircularProgressIndicator()
-                                }
-                            }
-                        }
-                    }
-                }
-
-                is LoadState.Loading -> {
-                    LoadingProgress(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(contentPadding),
-                    )
-                }
-
-                is LoadState.Error -> {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                if (refreshState is LoadState.Error) item {
                     ErrorMessageBox(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(contentPadding),
+                        modifier = Modifier.fillMaxSize(),
                         refreshState.error.message
                     )
                 }
+                items(
+                    count = lazyPagingModel.itemCount
+                ) { position ->
+                    lazyPagingModel[position]?.let { model ->
+                        NewsCard(
+                            model = model,
+                            onClick = { emitEvent(Event.OnArticleClick(model)) },
+                            onSourceClick = { emitEvent(Event.OnSourceClick(model)) },
+                            onShare = { emitEvent(Event.OnShareClick(model)) },
+                            onBookmark = {
+                                emitEvent(Event.OnBookmarkClick(model))
+                            }
+                        )
+                    }
+                }
+
+                if (lazyPagingModel.loadState.append is LoadState.Loading) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
             }
+        }
+        if (refreshState is LoadState.Loading) {
+            LoadingProgress(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding),
+            )
         }
     }
 }
