@@ -27,7 +27,7 @@ object ViewContract {
 
     sealed class Event : UiEvent {
         data object OnRefresh : Event()
-        data object OnDismissModal : Event()
+        data object OnModalDismiss : Event()
     }
 
     sealed class Effect : UiEffect {
@@ -36,7 +36,7 @@ object ViewContract {
 
     //optional
     sealed class ModalState {
-        data object Dismiss : ModalState()
+        data object None : ModalState()
     }
 }
 ```
@@ -81,11 +81,11 @@ class ViewViewModel @Inject constructor(
     override fun handleEvent(event: Event) {
         when (event) {
             is Event.OnRefresh -> fetch()
-            is Event.OnDismissModal -> dismissModal()
+            is Event.OnModalDismiss -> dismissModal()
         }
     }
 
-    private fun setModalState(modalState: ModalState) {
+    private fun setModal(modalState: ModalState) {
         setState { copy(modalState = modalState) }
     }
 
@@ -94,7 +94,7 @@ class ViewViewModel @Inject constructor(
     }
 
     private fun dismissModal() {
-        setModalState(ModalState.Dismiss)
+        setModal(ModalState.Dismiss)
     }
 }
 ```
@@ -126,6 +126,7 @@ class ViewViewModel @Inject constructor(
 // import *.presentation.view.contract.ViewContract.State   권장
 // import *.presentation.view.contract.ViewContract.Event   권장
 // import *.presentation.view.contract.ViewContract.Effect  권장
+// import *.presentation.view.contract.ViewContract.ModalState 권장
 // import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
@@ -153,7 +154,7 @@ fun ViewScreen(
 
     // 모달 상태 핸들링
     when (val modalState = state.modalState) {
-        is ViewContract.ModalState.Dismiss -> Unit
+        is ModalState.Nont -> Unit
     }
 }
 
