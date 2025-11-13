@@ -65,6 +65,6 @@ class BookmarkedViewModel @Inject constructor(
     }
 
     private fun share(model: NewsCardModel) {
-        setEffect(Effect.Launch(model.url))
+        setEffect(Effect.LaunchIntent(model.shareIntent()))
     }
 }
