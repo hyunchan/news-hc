@@ -17,6 +17,7 @@ import com.hcpark.news.presentation.component.MVIViewModel
 import com.hcpark.news.presentation.main.navigation.MainRoute
 import com.hcpark.news.presentation.news.contract.NewsContract.Effect
 import com.hcpark.news.presentation.news.contract.NewsContract.Event
+import com.hcpark.news.presentation.news.contract.NewsContract.ModalState
 import com.hcpark.news.presentation.news.contract.NewsContract.State
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -81,7 +82,14 @@ class NewsViewModel @Inject constructor(
             is Event.OnBookmarkClick -> toggleBookmark(event.model)
             is Event.OnShareClick -> share(event.model)
             is Event.OnCategoryChange -> updateCategory(event.category)
+            Event.OnModalDismiss -> dismissModal()
+            Event.OnReturnToMainClick -> showConfirmReturnToMain()
+            Event.OnReturnToMainConfirm -> confirmReturnToMain()
         }
+    }
+
+    private fun setModal(modalState: ModalState) {
+        setState { copy(modalState = modalState) }
     }
 
     private fun openLink(model: NewsCardModel) {
@@ -124,5 +132,18 @@ class NewsViewModel @Inject constructor(
 
     private fun updateCategory(category: Category) {
         setState { copy(category = category) }
+    }
+
+    private fun dismissModal() {
+        setModal(ModalState.None)
+    }
+
+    private fun showConfirmReturnToMain() {
+        setModal(ModalState.ConfirmReturnToMain)
+    }
+
+    private fun confirmReturnToMain() {
+        setModal(ModalState.None)
+        setEffect(Effect.NavigateToMain)
     }
 }

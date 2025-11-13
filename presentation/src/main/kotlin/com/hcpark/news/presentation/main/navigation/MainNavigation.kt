@@ -34,7 +34,10 @@ fun MainNavigation() {
             )
         ) {
             NewsScreen(
-                navigate = navController::navigate
+                navigate = navController::navigate,
+                navigateToMain = {
+                    navController.popBackStack(MainRoute.TOP20, false)
+                }
             )
         }
     }

@@ -9,7 +9,7 @@ import com.hcpark.news.presentation.component.UiState
 
 object NewsContract {
     data class State(
-        val modalState: ModalState = ModalState.Dismiss,
+        val modalState: ModalState = ModalState.None,
         val category: Category = Category.Default,
         val sources: String? = null
     ) : UiState {
@@ -22,15 +22,20 @@ object NewsContract {
         data class OnShareClick(val model: NewsCardModel) : Event
         data class OnBookmarkClick(val model: NewsCardModel) : Event
         data class OnCategoryChange(val category: Category) : Event
+        data object OnReturnToMainClick : Event
+        data object OnReturnToMainConfirm : Event
+        data object OnModalDismiss : Event
     }
 
     sealed interface Effect : UiEffect {
         data class Launch(val route: String) : Effect
         data class Toast(val message: String) : Effect
         data class LaunchIntent(val intent: Intent) : Effect
+        data object NavigateToMain : Effect
     }
 
     sealed class ModalState {
-        data object Dismiss : ModalState()
+        data object None : ModalState()
+        data object ConfirmReturnToMain : ModalState()
     }
 }

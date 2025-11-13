@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -46,9 +50,11 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun NewsScreen(
     viewModel: NewsViewModel = hiltViewModel(),
-    navigate: (String) -> Unit
+    navigate: (String) -> Unit,
+    navigateToMain: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val emitEvent = viewModel::setEvent
     val lazyPagingArticle = viewModel.topHeadlinePagingDataFlow.collectAsLazyPagingItems()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -71,12 +77,19 @@ fun NewsScreen(
                 is Effect.Launch -> navigate(effect.route)
                 is Effect.Toast -> snackbarHostState.showSnackbar(effect.message)
                 is Effect.LaunchIntent -> startActivity(effect.intent)
+                Effect.NavigateToMain -> navigateToMain()
             }
         }
     }
-
+    val onDismiss: () -> Unit = { emitEvent(Event.OnModalDismiss) }
     when (state.modalState) {
-        is ModalState.Dismiss -> Unit
+        is ModalState.None -> Unit
+        ModalState.ConfirmReturnToMain -> {
+            ConfirmReturnToMainDialog(
+                onConfirm = { emitEvent(Event.OnReturnToMainConfirm) },
+                onDismissRequest = onDismiss
+            )
+        }
     }
 }
 
@@ -92,6 +105,16 @@ fun NewsScreenContent(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(title = { Text("News") })
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { emitEvent(Event.OnReturnToMainClick) },
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "return to main"
+                )
+            }
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { contentPadding ->
