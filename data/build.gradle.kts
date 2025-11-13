@@ -53,7 +53,6 @@ dependencies {
 
     ksp(libs.androidx.room.compiler)
     ksp(libs.hilt.compiler)
-    
+
     testImplementation(libs.bundles.test)
-    androidTestImplementation(libs.bundles.android.test)
 }
