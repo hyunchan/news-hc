@@ -108,6 +108,7 @@ fun NewsScreenContent(
         },
         floatingActionButton = {
             FloatingActionButton(
+                modifier = Modifier.padding(8.dp),
                 onClick = { emitEvent(Event.OnReturnToMainClick) },
             ) {
                 Icon(
