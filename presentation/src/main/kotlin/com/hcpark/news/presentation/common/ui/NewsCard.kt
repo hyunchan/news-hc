@@ -112,12 +112,18 @@ fun NewsCard(
                     IconButton(onClick = onBookmark) {
                         Icon(
                             imageVector =
-                                if (model.isBookmarked) Icons.Filled.Bookmark
-                                else Icons.Default.BookmarkBorder,
+                            if (model.isBookmarked) {
+                                Icons.Filled.Bookmark
+                            } else {
+                                Icons.Default.BookmarkBorder
+                            },
                             contentDescription = "Bookmark",
                             tint =
-                                if (model.isBookmarked) colorScheme.primary
-                                else Color.Unspecified
+                            if (model.isBookmarked) {
+                                colorScheme.primary
+                            } else {
+                                Color.Unspecified
+                            }
                         )
                     }
                 }

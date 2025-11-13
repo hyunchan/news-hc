@@ -22,7 +22,6 @@ interface NewsRepository {
         sources: String? = null,
     ): PagingSource<Int, NewsArticle>
 
-
     suspend fun search(
         query: String,
         searchIns: List<SearchIn> = SearchIn.Defaults,

@@ -29,7 +29,6 @@ class BookmarkRepositoryImpl @Inject constructor(
             articleDao.delete(url)
         }
 
-
     override fun pagingDataFlow(): Flow<PagingData<BookmarkedArticle>> =
         Pager(
             config = PagingConfig(pageSize = 20),
@@ -47,7 +46,6 @@ class BookmarkRepositoryImpl @Inject constructor(
 
     override fun urls(): Flow<Set<String>> =
         articleDao.urls().map { it.toSet() }
-
 
     override suspend fun clearAll(): Result<Unit> =
         callCatching {

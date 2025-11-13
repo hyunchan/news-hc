@@ -83,8 +83,9 @@ class Top20ViewModel @Inject constructor(
     }
 
     private fun launchNews(model: NewsCardModel) {
-        if (model.sourceId != null)
+        if (model.sourceId != null) {
             setEffect(Effect.Launch(MainRoute.news(sources = model.sourceId)))
+        }
     }
 
     private fun openLink(model: NewsCardModel) {

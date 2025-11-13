@@ -8,8 +8,9 @@ import io.github.aakira.napier.Napier
 
 class NapierInitializer : Initializer<Unit> {
     override fun create(context: Context) {
-        if (BuildConfig.DEBUG)
+        if (BuildConfig.DEBUG) {
             Napier.base(DebugAntilog())
+        }
     }
 
     override fun dependencies(): List<Class<out Initializer<*>?>?> {
