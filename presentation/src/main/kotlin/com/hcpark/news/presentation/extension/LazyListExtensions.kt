@@ -20,3 +20,17 @@ fun LazyListState.isLastItemFullyVisible(): Boolean {
         lastItem.offset + lastItem.size <= layoutInfo.viewportEndOffset
     }
 }
+
+fun LazyListState.isFirstItemVisible(): Boolean {
+    if (isEmpty()) return false
+
+    return layoutInfo.visibleItemsInfo.first().index == 0
+}
+
+fun LazyListState.isFirstItemFullyVisible(): Boolean {
+    if (!isFirstItemVisible()) return false
+
+    return layoutInfo.visibleItemsInfo.first().let { firstItem ->
+        firstItem.offset >= layoutInfo.viewportStartOffset
+    }
+}

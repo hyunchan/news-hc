@@ -55,6 +55,7 @@ class Top20ViewModel @Inject constructor(
             is Event.OnSourceClick -> launchNews(event.model)
             is Event.OnBookmarkClick -> toggleBookmark(event.model)
             is Event.OnShareClick -> share(event.model)
+            Event.OnScrollToTopClick -> scrollToTop()
         }
     }
 
@@ -115,5 +116,9 @@ class Top20ViewModel @Inject constructor(
 
     private fun share(model: NewsCardModel) {
         setEffect(Effect.LaunchIntent(model.shareIntent()))
+    }
+
+    private fun scrollToTop() {
+        setEffect(Effect.ScrollToTop)
     }
 }

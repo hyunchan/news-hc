@@ -16,9 +16,11 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -45,6 +47,7 @@ import com.hcpark.news.presentation.common.ui.LoadingProgress
 import com.hcpark.news.presentation.common.ui.MessageBox
 import com.hcpark.news.presentation.common.ui.NewsCard
 import com.hcpark.news.presentation.extension.isEmpty
+import com.hcpark.news.presentation.extension.isFirstItemFullyVisible
 import com.hcpark.news.presentation.extension.isLastItemFullyVisible
 import com.hcpark.news.presentation.theme.colorScheme
 import com.hcpark.news.presentation.top20.contract.Top20Contract.Effect
@@ -61,6 +64,7 @@ fun Top20Screen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val listState = rememberLazyListState()
     val emitEvent: (Event) -> Unit = viewModel::setEvent
 
     val context = LocalContext.current
@@ -72,6 +76,7 @@ fun Top20Screen(
     Top20ScreenContent(
         state = state,
         snackbarHostState = snackbarHostState,
+        listState = listState,
         emitEvent = emitEvent,
     )
 
@@ -81,6 +86,7 @@ fun Top20Screen(
                 is Effect.Launch -> navigate(effect.route)
                 is Effect.Toast -> snackbarHostState.showSnackbar(effect.message)
                 is Effect.LaunchIntent -> startActivity(effect.intent)
+                Effect.ScrollToTop -> listState.animateScrollToItem(0)
             }
         }
     }
@@ -95,10 +101,11 @@ fun Top20Screen(
 fun Top20ScreenContent(
     state: State,
     snackbarHostState: SnackbarHostState,
+    listState: LazyListState,
     emitEvent: (Event) -> Unit,
 ) {
-    val listState = rememberLazyListState()
     val listScrollable by rememberScrollable(listState)
+    val scrollToTopVisible by rememberScrollToTopVisible(listState)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -116,6 +123,15 @@ fun Top20ScreenContent(
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            if (scrollToTopVisible) {
+                FloatingActionButton(
+                    onClick = { emitEvent(Event.OnScrollToTopClick) }
+                ) {
+                    Icon(Icons.Default.ArrowUpward, contentDescription = "Scroll to top")
+                }
+            }
+        },
         bottomBar = {
             Top20ScreenMoreNewsButton(
                 modifier = Modifier
@@ -131,6 +147,14 @@ fun Top20ScreenContent(
         LoadingProgress(modifier = Modifier.fillMaxSize())
     }
 }
+
+@Composable
+private fun rememberScrollToTopVisible(lazyListState: LazyListState) =
+    remember {
+        derivedStateOf {
+            !lazyListState.isEmpty() && !lazyListState.isFirstItemFullyVisible()
+        }
+    }
 
 @Composable
 private fun rememberScrollable(lazyListState: LazyListState) =

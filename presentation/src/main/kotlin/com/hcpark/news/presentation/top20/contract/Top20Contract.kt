@@ -25,12 +25,14 @@ object Top20Contract {
         data class OnSourceClick(val model: NewsCardModel) : Event()
         data class OnShareClick(val model: NewsCardModel) : Event()
         data class OnBookmarkClick(val model: NewsCardModel) : Event()
+        data object OnScrollToTopClick : Event()
     }
 
     sealed class Effect : UiEffect {
         data class Launch(val route: String) : Effect()
         data class Toast(val message: String) : Effect()
         data class LaunchIntent(val intent: Intent) : Effect()
+        data object ScrollToTop : Effect()
     }
 
     sealed class ModalState {
