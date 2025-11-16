@@ -1,6 +1,8 @@
 package com.hcpark.news.presentation.top20.ui
 
 import android.content.Intent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material3.Button
@@ -40,6 +44,8 @@ import com.hcpark.news.presentation.common.model.NewsCardModel
 import com.hcpark.news.presentation.common.ui.LoadingProgress
 import com.hcpark.news.presentation.common.ui.MessageBox
 import com.hcpark.news.presentation.common.ui.NewsCard
+import com.hcpark.news.presentation.extension.isEmpty
+import com.hcpark.news.presentation.extension.isLastItemFullyVisible
 import com.hcpark.news.presentation.theme.colorScheme
 import com.hcpark.news.presentation.top20.contract.Top20Contract.Effect
 import com.hcpark.news.presentation.top20.contract.Top20Contract.Event
@@ -91,6 +97,9 @@ fun Top20ScreenContent(
     snackbarHostState: SnackbarHostState,
     emitEvent: (Event) -> Unit,
 ) {
+    val listState = rememberLazyListState()
+    val listScrollable by rememberScrollable(listState)
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -108,10 +117,15 @@ fun Top20ScreenContent(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            Top20ScreenMoreNewsButton { emitEvent(Event.OnMoreNewsClick) }
+            Top20ScreenMoreNewsButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .bottomBarBackground(scrollable = listScrollable),
+                onClick = { emitEvent(Event.OnMoreNewsClick) }
+            )
         }
     ) { contentPadding ->
-        Top20ScreenNewsList(contentPadding, state, emitEvent)
+        Top20ScreenNewsList(listState, contentPadding, state, emitEvent)
     }
     if (state.isLoading) {
         LoadingProgress(modifier = Modifier.fillMaxSize())
@@ -119,7 +133,20 @@ fun Top20ScreenContent(
 }
 
 @Composable
+private fun rememberScrollable(lazyListState: LazyListState) =
+    remember(lazyListState) {
+        derivedStateOf {
+            if (lazyListState.isEmpty()) {
+                false
+            } else {
+                !lazyListState.isLastItemFullyVisible()
+            }
+        }
+    }
+
+@Composable
 private fun Top20ScreenNewsList(
+    lazyListState: LazyListState,
     contentPadding: PaddingValues,
     state: State,
     emitEvent: (Event) -> Unit,
@@ -134,6 +161,7 @@ private fun Top20ScreenNewsList(
     }
 
     LazyColumn(
+        state = lazyListState,
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -162,18 +190,12 @@ private fun Top20ScreenNewsList(
 }
 
 @Composable
-private fun Top20ScreenMoreNewsButton(onClick: () -> Unit) {
+private fun Top20ScreenMoreNewsButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color.Transparent,
-                        colorScheme.secondary.copy(alpha = 0.8f)
-                    )
-                )
-            )
+        modifier = modifier
             .navigationBarsPadding()
             .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center
@@ -182,4 +204,23 @@ private fun Top20ScreenMoreNewsButton(onClick: () -> Unit) {
             Text(text = "More News")
         }
     }
+}
+
+@Composable
+private fun Modifier.bottomBarBackground(
+    scrollable: Boolean
+): Modifier {
+    val bottomBarAlpha by animateFloatAsState(
+        targetValue = if (scrollable) 0.8f else 0f,
+        animationSpec = tween(durationMillis = 500),
+        label = "bottomBarAlpha"
+    )
+    return background(
+        brush = Brush.verticalGradient(
+            colors = listOf(
+                Color.Transparent,
+                colorScheme.secondary.copy(alpha = bottomBarAlpha)
+            )
+        )
+    )
 }
