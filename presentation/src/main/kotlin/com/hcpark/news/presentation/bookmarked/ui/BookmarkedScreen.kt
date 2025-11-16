@@ -3,11 +3,16 @@ package com.hcpark.news.presentation.bookmarked.ui
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -15,6 +20,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -27,9 +33,10 @@ import com.hcpark.news.presentation.bookmarked.contract.BookmarkedContract.Event
 import com.hcpark.news.presentation.bookmarked.viewmodel.BookmarkedViewModel
 import com.hcpark.news.presentation.common.model.NewsCardEvent
 import com.hcpark.news.presentation.common.model.NewsCardModel
-import com.hcpark.news.presentation.common.ui.ErrorMessageBox
 import com.hcpark.news.presentation.common.ui.LoadingProgress
+import com.hcpark.news.presentation.common.ui.MessageBox
 import com.hcpark.news.presentation.common.ui.NewsCard
+import com.hcpark.news.presentation.theme.colorScheme
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -98,10 +105,14 @@ private fun BookmarkedScreenCardList(
     ) {
         if (refreshState is LoadState.Error) {
             item {
-                ErrorMessageBox(
+                MessageBox(
                     modifier = Modifier.fillMaxSize(),
                     refreshState.error.message
                 )
+            }
+        } else if (lazyPagingItems.itemCount == 0) {
+            item {
+                BookmarkedScreenEmptyMessage()
             }
         }
         items(
@@ -137,6 +148,29 @@ private fun BookmarkedScreenCardList(
                         .padding(16.dp)
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun BookmarkedScreenEmptyMessage() {
+    MessageBox(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 24.dp),
+        message = "북마크가 없어요!"
+    ) { defaultMessage ->
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                modifier = Modifier.size(48.dp),
+                imageVector = Icons.Outlined.Bookmarks,
+                contentDescription = "no bookmarks",
+                tint = colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+            )
+            defaultMessage()
         }
     }
 }

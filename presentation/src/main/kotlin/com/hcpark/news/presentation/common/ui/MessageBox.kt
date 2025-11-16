@@ -6,14 +6,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.hcpark.news.presentation.theme.colorScheme
 
 @Composable
-fun ErrorMessageBox(
+fun MessageBox(
     modifier: Modifier = Modifier,
     message: String?,
-    contentAlignment: Alignment = Alignment.TopCenter
+    color: Color = colorScheme.onSurfaceVariant,
+    contentAlignment: Alignment = Alignment.TopCenter,
+    decoration: @Composable (defaultMessage: @Composable () -> Unit) -> Unit = { it() }
 ) {
     Box(
         modifier = Modifier
@@ -21,9 +24,11 @@ fun ErrorMessageBox(
             .padding(horizontal = 16.dp),
         contentAlignment = contentAlignment
     ) {
-        Text(
-            text = message ?: "Unknown error",
-            color = colorScheme.onSurfaceVariant
-        )
+        decoration {
+            Text(
+                text = message ?: "Unknown error",
+                color = color
+            )
+        }
     }
 }

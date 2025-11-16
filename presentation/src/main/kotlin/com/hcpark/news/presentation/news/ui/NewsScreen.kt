@@ -38,8 +38,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.hcpark.news.domain.model.Category
 import com.hcpark.news.presentation.common.model.NewsCardEvent
 import com.hcpark.news.presentation.common.model.NewsCardModel
-import com.hcpark.news.presentation.common.ui.ErrorMessageBox
 import com.hcpark.news.presentation.common.ui.LoadingProgress
+import com.hcpark.news.presentation.common.ui.MessageBox
 import com.hcpark.news.presentation.common.ui.NewsCard
 import com.hcpark.news.presentation.news.contract.NewsContract.Effect
 import com.hcpark.news.presentation.news.contract.NewsContract.Event
@@ -165,7 +165,7 @@ private fun NewsScreenCardList(
     ) {
         if (refreshState is LoadState.Error) {
             item {
-                ErrorMessageBox(
+                MessageBox(
                     modifier = Modifier.fillMaxSize(),
                     refreshState.error.message
                 )

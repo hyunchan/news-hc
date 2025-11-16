@@ -37,8 +37,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hcpark.news.presentation.common.model.NewsCardEvent
 import com.hcpark.news.presentation.common.model.NewsCardModel
-import com.hcpark.news.presentation.common.ui.ErrorMessageBox
 import com.hcpark.news.presentation.common.ui.LoadingProgress
+import com.hcpark.news.presentation.common.ui.MessageBox
 import com.hcpark.news.presentation.common.ui.NewsCard
 import com.hcpark.news.presentation.theme.colorScheme
 import com.hcpark.news.presentation.top20.contract.Top20Contract.Effect
@@ -139,7 +139,7 @@ private fun Top20ScreenNewsList(
     ) {
         if (state.fetchError != null) {
             item {
-                ErrorMessageBox(
+                MessageBox(
                     modifier = Modifier.fillMaxSize(),
                     message = state.fetchError.message
                 )
