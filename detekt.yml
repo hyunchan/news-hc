@@ -1,5 +1,5 @@
 build:
-  maxIssues: 10        # 최대 10개의 위반까지 허용 (CI 안정화 단계에서 유용)
+  maxIssues: 0        # 최대 10개의 위반까지 허용 (CI 안정화 단계에서 유용)
 
 config:
   validation: true
@@ -43,7 +43,7 @@ style:
   active: true
   MagicNumber:
     active: true
-    ignoreNumbers: [ "-1", "0", "1", "2" ]
+    ignoreNumbers: [ "-1", "0", "1", "2", "100" ]
     ignoreHashCodeFunction: true
     ignoreAnnotation: true
   UnusedImports:
@@ -60,12 +60,16 @@ style:
   MaxLineLength:
     active: true
     maxLineLength: 120
+  UnusedPrivateMember:
+    active: true
+    ignoreAnnotated:
+      - Preview
 
 naming:
   active: true
   FunctionNaming:
     active: true
-    ignoreAnnotated: ['Composable']
+    ignoreAnnotated: [ 'Composable' ]
     excludes: [ '**/test/**' ]
   VariableNaming:
     active: true

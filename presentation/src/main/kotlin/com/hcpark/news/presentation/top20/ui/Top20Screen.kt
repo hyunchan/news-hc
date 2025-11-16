@@ -4,13 +4,13 @@ import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material3.Button
@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.hcpark.news.presentation.common.model.NewsCardEvent
 import com.hcpark.news.presentation.common.model.NewsCardModel
 import com.hcpark.news.presentation.common.ui.ErrorMessageBox
 import com.hcpark.news.presentation.common.ui.LoadingProgress
@@ -90,14 +91,6 @@ fun Top20ScreenContent(
     snackbarHostState: SnackbarHostState,
     emitEvent: (Event) -> Unit,
 ) {
-    val entries by remember(state.articles, state.bookmarkedUrls) {
-        derivedStateOf {
-            state.articles.map { article ->
-                val isBookmarked = state.bookmarkedUrls.contains(article.url)
-                NewsCardModel(article, isBookmarked)
-            }
-        }
-    }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -115,56 +108,78 @@ fun Top20ScreenContent(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                colorScheme.secondary.copy(alpha = 0.8f)
-                            )
-                        )
-                    )
-                    .navigationBarsPadding()
-                    .padding(vertical = 16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Button(
-                    onClick = { emitEvent(Event.OnMoreNewsClick) },
-                    shape = RoundedCornerShape(100)
-                ) {
-                    Text(text = "More News")
-                }
-            }
+            Top20ScreenMoreNewsButton { emitEvent(Event.OnMoreNewsClick) }
         }
     ) { contentPadding ->
-        LazyColumn(
-            contentPadding = contentPadding,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            if (state.fetchError != null) item {
+        Top20ScreenNewsList(contentPadding, state, emitEvent)
+    }
+    if (state.isLoading) {
+        LoadingProgress(modifier = Modifier.fillMaxSize())
+    }
+}
+
+@Composable
+private fun Top20ScreenNewsList(
+    contentPadding: PaddingValues,
+    state: State,
+    emitEvent: (Event) -> Unit,
+) {
+    val entries by remember(state.articles, state.bookmarkedUrls) {
+        derivedStateOf {
+            state.articles.map { article ->
+                val isBookmarked = state.bookmarkedUrls.contains(article.url)
+                NewsCardModel(article, isBookmarked)
+            }
+        }
+    }
+
+    LazyColumn(
+        contentPadding = contentPadding,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        if (state.fetchError != null) {
+            item {
                 ErrorMessageBox(
                     modifier = Modifier.fillMaxSize(),
                     message = state.fetchError.message
                 )
             }
-            items(entries) { model ->
-                NewsCard(
-                    model = model,
-                    onClick = { emitEvent(Event.OnArticleClick(model)) },
-                    onSourceClick = { emitEvent(Event.OnSourceClick(model)) },
-                    onShare = { emitEvent(Event.OnShareClick(model)) },
-                    onBookmark = { emitEvent(Event.OnBookmarkClick(model)) }
-                )
-            }
         }
-        if (state.isLoading) {
-            LoadingProgress(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding),
+        items(entries) { model ->
+            NewsCard(
+                model = model,
+                onEvent = {
+                    when (it) {
+                        is NewsCardEvent.BookmarkClick -> emitEvent(Event.OnBookmarkClick(model))
+                        is NewsCardEvent.CardClick -> emitEvent(Event.OnArticleClick(model))
+                        is NewsCardEvent.SourceClick -> emitEvent(Event.OnSourceClick(model))
+                        is NewsCardEvent.ShareClick -> emitEvent(Event.OnShareClick(model))
+                    }
+                }
             )
+        }
+    }
+}
+
+@Composable
+private fun Top20ScreenMoreNewsButton(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        colorScheme.secondary.copy(alpha = 0.8f)
+                    )
+                )
+            )
+            .navigationBarsPadding()
+            .padding(vertical = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Button(onClick = onClick) {
+            Text(text = "More News")
         }
     }
 }

@@ -36,6 +36,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.hcpark.news.domain.model.Category
+import com.hcpark.news.presentation.common.model.NewsCardEvent
 import com.hcpark.news.presentation.common.model.NewsCardModel
 import com.hcpark.news.presentation.common.ui.ErrorMessageBox
 import com.hcpark.news.presentation.common.ui.LoadingProgress
@@ -119,72 +120,88 @@ fun NewsScreenContent(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { contentPadding ->
-        val refreshState = lazyPagingModel.loadState.refresh
-
         Column(modifier = Modifier.padding(contentPadding)) {
-            if (state.filterVisible) {
-                LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(Category.entries) { category ->
-                        FilterChip(
-                            selected = state.category == category,
-                            onClick = { emitEvent(Event.OnCategoryChange(category)) },
-                            label = { Text(text = category.name) }
-                        )
-                    }
-                }
-            }
+            NewsScreenFilterRow(state, emitEvent)
+            NewsScreenCardList(lazyPagingModel, emitEvent)
+        }
+    }
+    if (lazyPagingModel.loadState.refresh is LoadState.Loading) {
+        LoadingProgress(modifier = Modifier.fillMaxSize())
+    }
+}
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                if (refreshState is LoadState.Error) item {
-                    ErrorMessageBox(
-                        modifier = Modifier.fillMaxSize(),
-                        refreshState.error.message
-                    )
-                }
-                items(
-                    count = lazyPagingModel.itemCount
-                ) { position ->
-                    lazyPagingModel[position]?.let { model ->
-                        NewsCard(
-                            model = model,
-                            onClick = { emitEvent(Event.OnArticleClick(model)) },
-                            onSourceClick = { emitEvent(Event.OnSourceClick(model)) },
-                            onShare = { emitEvent(Event.OnShareClick(model)) },
-                            onBookmark = {
-                                emitEvent(Event.OnBookmarkClick(model))
-                            }
-                        )
-                    }
-                }
-
-                if (lazyPagingModel.loadState.append is LoadState.Loading) {
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                }
+@Composable
+private fun NewsScreenFilterRow(
+    state: State,
+    emitEvent: (Event) -> Unit
+) {
+    if (state.filterVisible) {
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(Category.entries) { category ->
+                FilterChip(
+                    selected = state.category == category,
+                    onClick = { emitEvent(Event.OnCategoryChange(category)) },
+                    label = { Text(text = category.name) }
+                )
             }
         }
-        if (refreshState is LoadState.Loading) {
-            LoadingProgress(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding),
-            )
+    }
+}
+
+@Composable
+private fun NewsScreenCardList(
+    lazyPagingModel: LazyPagingItems<NewsCardModel>,
+    emitEvent: (Event) -> Unit,
+    refreshState: LoadState = lazyPagingModel.loadState.refresh,
+) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        if (refreshState is LoadState.Error) {
+            item {
+                ErrorMessageBox(
+                    modifier = Modifier.fillMaxSize(),
+                    refreshState.error.message
+                )
+            }
+        }
+        items(
+            count = lazyPagingModel.itemCount
+        ) { position ->
+            lazyPagingModel[position]?.let { model ->
+                NewsCard(
+                    model = model,
+                    onEvent = {
+                        when (it) {
+                            NewsCardEvent.BookmarkClick ->
+                                emitEvent(Event.OnBookmarkClick(model))
+
+                            NewsCardEvent.CardClick -> emitEvent(Event.OnArticleClick(model))
+                            NewsCardEvent.ShareClick -> emitEvent(Event.OnShareClick(model))
+                            NewsCardEvent.SourceClick -> emitEvent(Event.OnSourceClick(model))
+                        }
+                    }
+                )
+            }
+        }
+
+        if (lazyPagingModel.loadState.append is LoadState.Loading) {
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
         }
     }
 }

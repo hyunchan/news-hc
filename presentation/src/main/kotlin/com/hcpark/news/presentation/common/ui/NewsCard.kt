@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -34,6 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.hcpark.news.presentation.common.model.NewsCardEvent
 import com.hcpark.news.presentation.common.model.NewsCardModel
 import com.hcpark.news.presentation.theme.MyApplicationTheme
 import com.hcpark.news.presentation.theme.colorScheme
@@ -42,112 +42,133 @@ import com.hcpark.news.presentation.theme.colorScheme
 fun NewsCard(
     modifier: Modifier = Modifier,
     model: NewsCardModel,
-    onClick: () -> Unit,
-    onSourceClick: () -> Unit,
-    onShare: () -> Unit,
-    onBookmark: () -> Unit
+    onEvent: (NewsCardEvent) -> Unit
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = { onEvent(NewsCardEvent.CardClick) }),
         colors = CardDefaults.cardColors(
             containerColor = colorScheme.background
         ),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Column {
-            // Hero Image
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                var error by remember { mutableStateOf(false) }
+        NewsCardHeroImage(model)
+        NewsCardContent(model, onEvent)
+    }
+}
 
-                AsyncImage(
-                    model = model.imageUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    onLoading = { error = false },
-                    onError = { error = true }
-                )
-                if (error)
-                    Icon(
-                        modifier = Modifier.size(52.dp),
-                        imageVector = Icons.Outlined.ImageNotSupported,
-                        contentDescription = "Image Not Supported",
-                        tint = colorScheme.secondary,
-                    )
-            }
+@Composable
+private fun NewsCardHeroImage(model: NewsCardModel) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        var error by remember { mutableStateOf(false) }
 
-            Column(modifier = Modifier.padding(16.dp)) {
-                // Source Badge
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        modifier = Modifier.clickable(onClick = onSourceClick),
-                        text = model.sourceName,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = model.publishedAt,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+        AsyncImage(
+            model = model.imageUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            onLoading = { error = false },
+            onError = { error = true }
+        )
+        if (error) {
+            Icon(
+                modifier = Modifier.size(52.dp),
+                imageVector = Icons.Outlined.ImageNotSupported,
+                contentDescription = "Image Not Supported",
+                tint = colorScheme.secondary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun NewsCardContent(model: NewsCardModel, onEvent: (NewsCardEvent) -> Unit) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        NewsCardSourceBadge(model = model, onEvent = onEvent)
+        // Title
+        Text(
+            modifier = Modifier.padding(top = 8.dp),
+            text = model.title,
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+        // Description
+        Text(
+            modifier = Modifier.padding(top = 4.dp),
+            text = model.description,
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        NewsCardActions(
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .fillMaxWidth(),
+            model = model,
+            onEvent = onEvent
+        )
+    }
+}
+
+@Composable
+private fun NewsCardSourceBadge(model: NewsCardModel, onEvent: (NewsCardEvent) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            modifier = Modifier.clickable(
+                enabled = model.sourceId != null,
+                onClick = { onEvent(NewsCardEvent.SourceClick) }
+            ),
+            text = model.sourceName,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = model.publishedAt,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun NewsCardActions(
+    modifier: Modifier = Modifier,
+    model: NewsCardModel,
+    onEvent: (NewsCardEvent) -> Unit
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.End
+    ) {
+        IconButton(onClick = { onEvent(NewsCardEvent.ShareClick) }) {
+            Icon(Icons.Default.Share, contentDescription = "Share")
+        }
+        IconButton(onClick = { onEvent(NewsCardEvent.BookmarkClick) }) {
+            Icon(
+                imageVector = if (model.isBookmarked) {
+                    Icons.Filled.Bookmark
+                } else {
+                    Icons.Default.BookmarkBorder
+                },
+                contentDescription = "Bookmark",
+                tint = if (model.isBookmarked) {
+                    colorScheme.primary
+                } else {
+                    Color.Unspecified
                 }
-                // Title
-                Text(
-                    modifier = Modifier.padding(top = 8.dp),
-                    text = model.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                // Description
-                Text(
-                    modifier = Modifier.padding(top = 4.dp),
-                    text = model.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Actions
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    IconButton(onClick = onShare) {
-                        Icon(Icons.Default.Share, contentDescription = "Share")
-                    }
-                    IconButton(onClick = onBookmark) {
-                        Icon(
-                            imageVector =
-                                if (model.isBookmarked) {
-                                    Icons.Filled.Bookmark
-                                } else {
-                                    Icons.Default.BookmarkBorder
-                                },
-                            contentDescription = "Bookmark",
-                            tint =
-                                if (model.isBookmarked) {
-                                    colorScheme.primary
-                                } else {
-                                    Color.Unspecified
-                                }
-                        )
-                    }
-                }
-            }
+            )
         }
     }
 }
@@ -172,11 +193,14 @@ private fun NewsCardPreview() {
     MyApplicationTheme {
         NewsCard(
             model = model,
-            onClick = { },
-            onSourceClick = { },
-            onShare = { },
-            onBookmark = {
-                model = model.copy(isBookmarked = !model.isBookmarked)
+            onEvent = {
+                when (it) {
+                    is NewsCardEvent.BookmarkClick -> {
+                        model = model.copy(isBookmarked = !model.isBookmarked)
+                    }
+
+                    else -> {}
+                }
             }
         )
     }

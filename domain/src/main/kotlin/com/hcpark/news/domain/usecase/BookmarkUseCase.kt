@@ -9,23 +9,6 @@ import javax.inject.Singleton
 class BookmarkUseCase @Inject constructor(
     private val repository: BookmarkRepository
 ) {
-    suspend operator fun invoke(
-        url: String,
-        title: String,
-        description: String,
-        sourceId: String?,
-        sourceName: String,
-        publishedAt: String,
-        imageUrl: String
-    ) = repository.insert(
-        BookmarkedArticle(
-            url = url,
-            title = title,
-            description = description,
-            sourceId = sourceId,
-            sourceName = sourceName,
-            publishedAt = publishedAt,
-            imageUrl = imageUrl
-        )
-    )
+    suspend operator fun invoke(bookmarkedArticle: BookmarkedArticle) =
+        repository.insert(bookmarkedArticle)
 }

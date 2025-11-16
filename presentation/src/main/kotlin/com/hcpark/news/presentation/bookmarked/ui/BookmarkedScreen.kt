@@ -3,12 +3,10 @@ package com.hcpark.news.presentation.bookmarked.ui
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -16,20 +14,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.hcpark.news.presentation.bookmarked.contract.BookmarkedContract.Effect
 import com.hcpark.news.presentation.bookmarked.contract.BookmarkedContract.Event
-import com.hcpark.news.presentation.bookmarked.contract.BookmarkedContract.State
 import com.hcpark.news.presentation.bookmarked.viewmodel.BookmarkedViewModel
+import com.hcpark.news.presentation.common.model.NewsCardEvent
 import com.hcpark.news.presentation.common.model.NewsCardModel
 import com.hcpark.news.presentation.common.ui.ErrorMessageBox
 import com.hcpark.news.presentation.common.ui.LoadingProgress
@@ -41,8 +37,8 @@ fun BookmarkedScreen(
     viewModel: BookmarkedViewModel = hiltViewModel(),
     navigate: (String) -> Unit
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val lazyPagingArticle = viewModel.articlePagingDataFlow.collectAsLazyPagingItems()
+    // val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val lazyPagingItems = viewModel.newsCardModelPagingData.collectAsLazyPagingItems()
     val snackbarHostState = remember { SnackbarHostState() }
 
     val context = LocalContext.current
@@ -52,8 +48,7 @@ fun BookmarkedScreen(
     }
 
     BookmarkedScreenContent(
-        state = state,
-        lazyPagingArticle = lazyPagingArticle,
+        lazyPagingItems = lazyPagingItems,
         emitEvent = viewModel::setEvent
     )
 
@@ -71,8 +66,7 @@ fun BookmarkedScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookmarkedScreenContent(
-    state: State,
-    lazyPagingArticle: LazyPagingItems<NewsCardModel>,
+    lazyPagingItems: LazyPagingItems<NewsCardModel>,
     emitEvent: (Event) -> Unit
 ) {
     Scaffold(
@@ -82,54 +76,65 @@ fun BookmarkedScreenContent(
         }
     ) { contentPadding ->
         Box(modifier = Modifier.padding(contentPadding)) {
-            val refreshState = lazyPagingArticle.loadState.refresh
+            val refreshState = lazyPagingItems.loadState.refresh
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                if (refreshState is LoadState.Error) {
-                    item {
-                        ErrorMessageBox(
-                            modifier = Modifier.fillMaxSize(),
-                            refreshState.error.message
-                        )
-                    }
-                }
-                items(
-                    count = lazyPagingArticle.itemCount,
-                    key = { lazyPagingArticle[it]?.url ?: Unit }
-                ) { position ->
-                    lazyPagingArticle[position]?.let { model ->
-                        NewsCard(
-                            modifier = Modifier.animateItem(),
-                            model = model,
-                            onClick = { emitEvent(Event.OnArticleClick(model)) },
-                            onSourceClick = { },
-                            onShare = { emitEvent(Event.OnShareClick(model)) },
-                            onBookmark = { emitEvent(Event.OnBookmarkClick(model)) }
-                        )
-                    }
-                }
+            BookmarkedScreenCardList(lazyPagingItems, emitEvent, refreshState)
+        }
+    }
 
-                if (lazyPagingArticle.loadState.append is LoadState.Loading) {
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            CircularProgressIndicator()
+    if (lazyPagingItems.loadState.refresh is LoadState.Loading) {
+        LoadingProgress(modifier = Modifier.fillMaxSize())
+    }
+}
+
+@Composable
+private fun BookmarkedScreenCardList(
+    lazyPagingItems: LazyPagingItems<NewsCardModel>,
+    emitEvent: (Event) -> Unit,
+    refreshState: LoadState = lazyPagingItems.loadState.refresh,
+) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        if (refreshState is LoadState.Error) {
+            item {
+                ErrorMessageBox(
+                    modifier = Modifier.fillMaxSize(),
+                    refreshState.error.message
+                )
+            }
+        }
+        items(
+            count = lazyPagingItems.itemCount,
+            key = { lazyPagingItems[it]?.url ?: Unit }
+        ) { position ->
+            lazyPagingItems[position]?.let { model ->
+                NewsCard(
+                    modifier = Modifier.animateItem(),
+                    model = model,
+                    onEvent = {
+                        when (it) {
+                            NewsCardEvent.BookmarkClick -> emitEvent(
+                                Event.OnBookmarkClick(
+                                    model
+                                )
+                            )
+
+                            NewsCardEvent.CardClick -> emitEvent(Event.OnArticleClick(model))
+                            NewsCardEvent.ShareClick -> emitEvent(Event.OnShareClick(model))
+                            NewsCardEvent.SourceClick -> Unit
                         }
                     }
-                }
+                )
             }
+        }
 
-            if (refreshState is LoadState.Loading) {
+        if (lazyPagingItems.loadState.append is LoadState.Loading) {
+            item {
                 LoadingProgress(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(contentPadding),
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 )
             }
         }

@@ -108,15 +108,7 @@ class NewsViewModel @Inject constructor(
                 unbookmarkUseCase(model.url).getOrThrow()
                 "북마크가 해제되었습니다"
             } else {
-                bookmarkUseCase(
-                    url = model.url,
-                    title = model.title,
-                    description = model.description,
-                    imageUrl = model.imageUrl,
-                    sourceId = model.sourceId,
-                    sourceName = model.sourceName,
-                    publishedAt = model.publishedAt
-                ).getOrThrow()
+                bookmarkUseCase(model.toBookmarkedArticle()).getOrThrow()
                 "북마크가 추가되었습니다"
             }
         }.onSuccess {

@@ -22,7 +22,7 @@ class BookmarkedViewModel @Inject constructor(
     private val unbookmarkUseCase: UnbookmarkUseCase,
 ) : MVIViewModel<Event, State, Effect>() {
 
-    val articlePagingDataFlow = observeBookmarkedArticleUseCase()
+    val newsCardModelPagingData = observeBookmarkedArticleUseCase()
         .map { pagingData ->
             pagingData.map { NewsCardModel(it) }
         }

@@ -59,6 +59,17 @@ data class NewsCardModel(
         }
     }
 
+    fun toBookmarkedArticle(): BookmarkedArticle =
+        BookmarkedArticle(
+            url = url,
+            title = title,
+            description = description,
+            imageUrl = imageUrl,
+            sourceId = sourceId,
+            sourceName = sourceName,
+            publishedAt = publishedAt
+        )
+
     companion object {
         private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
