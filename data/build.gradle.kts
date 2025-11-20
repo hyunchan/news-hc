@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.detekt)
+    alias(libs.plugins.convention.detekt)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.serialization)
@@ -31,16 +31,7 @@ android {
     }
 }
 
-detekt {
-    buildUponDefaultConfig = true
-    allRules = false
-    autoCorrect = true
-    config.setFrom(files("$rootDir/detekt.yml"))
-}
-
 dependencies {
-    detektPlugins(libs.detekt.formatting)
-
     implementation(project(":domain"))
     implementation(project(":util"))
 

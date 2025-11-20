@@ -4,16 +4,9 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.detekt)
+    alias(libs.plugins.convention.detekt)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
-}
-
-val localProperties = Properties().apply {
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        load(localPropertiesFile.inputStream())
-    }
 }
 
 android {
@@ -27,8 +20,10 @@ android {
         versionCode = properties["versionCode"].toString().toInt()
         versionName = properties["versionName"].toString()
 
-        buildConfigStringField(field = ConfigField.API_KEY, propertyKey = "API_KEY")
-        buildConfigStringField(field = ConfigField.API_HOST, propertyKey = "API_HOST")
+        val localProperties = localProperties()
+
+        buildConfigStringField(BuildConfigField.API_KEY, localProperties)
+        buildConfigStringField(BuildConfigField.API_HOST, localProperties)
     }
 
     buildTypes {
@@ -52,16 +47,7 @@ android {
     }
 }
 
-detekt {
-    buildUponDefaultConfig = true
-    allRules = false
-    autoCorrect = true
-    config.setFrom(files("$rootDir/detekt.yml"))
-}
-
 dependencies {
-    detektPlugins(libs.detekt.formatting)
-
     implementation(project(":domain"))
     implementation(project(":data"))
     implementation(project(":presentation"))
@@ -75,11 +61,21 @@ dependencies {
     ksp(libs.hilt.compiler)
 }
 
-enum class ConfigField {
+enum class BuildConfigField {
     API_KEY, API_HOST
 }
 
-fun VariantDimension.buildConfigStringField(field: ConfigField, propertyKey: String) {
-    val propertyValue = localProperties.getProperty(propertyKey, "")
-    buildConfigField("String", field.name, "\"$propertyValue\"")
+
+fun localProperties() = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
+    }
 }
+
+fun VariantDimension.buildConfigStringField(field: BuildConfigField, properties: Properties) {
+    val key = field.name
+    val propertyValue = properties.getOrDefault(key, "")
+    buildConfigField("String", key, "\"$propertyValue\"")
+}
+

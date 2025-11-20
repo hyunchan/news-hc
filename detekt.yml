@@ -58,7 +58,7 @@ style:
   NewLineAtEndOfFile:
     active: true
   MaxLineLength:
-    active: true
+    active: false
     maxLineLength: 120
   UnusedPrivateMember:
     active: true

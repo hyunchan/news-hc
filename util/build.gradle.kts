@@ -1,7 +1,7 @@
 plugins {
     `java-library`
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.detekt)
+    alias(libs.plugins.convention.detekt)
 }
 
 java {
@@ -9,13 +9,5 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
-detekt {
-    buildUponDefaultConfig = true
-    allRules = false
-    autoCorrect = true
-    config.setFrom(files("$rootDir/detekt.yml"))
-}
-
 dependencies {
-    detektPlugins(libs.detekt.formatting)
 }

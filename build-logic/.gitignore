@@ -1,0 +1,43 @@
+# Built application files
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Keystore files
+*.jks
+*.keystore
+
+# Log files
+*.log
+
+# Profiler dumps
+*.hprof
+
+# Play Asset Delivery temp files
+.play/
+
+# Local properties
+/local.properties
+
+# Android Studio/IntelliJ
+*.iml
+.gradle
+
+# Ignore all .idea files, but keep some shared settings
+/.idea/
+# Keep code style settings
+!/.idea/codeStyles/
+# Keep run configurations
+!/.idea/runConfigurations/
+# Keep inspection profiles
+!/.idea/inspectionProfiles/
+# Keep project prompts
+!/.idea/project.prompts.xml
+
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
