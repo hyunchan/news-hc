@@ -27,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,7 +41,7 @@ import com.hcpark.news.presentation.theme.colorScheme
 fun NewsCard(
     modifier: Modifier = Modifier,
     model: NewsCardModel,
-    onEvent: (NewsCardEvent) -> Unit
+    onEvent: (NewsCardEvent) -> Unit,
 ) {
     Card(
         modifier = modifier
@@ -50,9 +49,9 @@ fun NewsCard(
             .padding(16.dp)
             .clickable(onClick = { onEvent(NewsCardEvent.CardClick) }),
         colors = CardDefaults.cardColors(
-            containerColor = colorScheme.background
+            containerColor = colorScheme.background,
         ),
-        elevation = CardDefaults.cardElevation(4.dp)
+        elevation = CardDefaults.cardElevation(4.dp),
     ) {
         NewsCardHeroImage(model)
         NewsCardContent(model, onEvent)
@@ -65,7 +64,7 @@ private fun NewsCardHeroImage(model: NewsCardModel) {
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         var error by remember { mutableStateOf(false) }
 
@@ -74,7 +73,7 @@ private fun NewsCardHeroImage(model: NewsCardModel) {
             contentDescription = null,
             contentScale = ContentScale.Crop,
             onLoading = { error = false },
-            onError = { error = true }
+            onError = { error = true },
         )
         if (error) {
             Icon(
@@ -97,7 +96,7 @@ private fun NewsCardContent(model: NewsCardModel, onEvent: (NewsCardEvent) -> Un
             text = model.title,
             style = MaterialTheme.typography.titleMedium,
             maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
         // Description
         Text(
@@ -106,7 +105,7 @@ private fun NewsCardContent(model: NewsCardModel, onEvent: (NewsCardEvent) -> Un
             style = MaterialTheme.typography.bodySmall,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         NewsCardActions(
@@ -114,7 +113,7 @@ private fun NewsCardContent(model: NewsCardModel, onEvent: (NewsCardEvent) -> Un
                 .padding(top = 8.dp)
                 .fillMaxWidth(),
             model = model,
-            onEvent = onEvent
+            onEvent = onEvent,
         )
     }
 }
@@ -123,21 +122,21 @@ private fun NewsCardContent(model: NewsCardModel, onEvent: (NewsCardEvent) -> Un
 private fun NewsCardSourceBadge(model: NewsCardModel, onEvent: (NewsCardEvent) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
             modifier = Modifier.clickable(
                 enabled = model.sourceId != null,
-                onClick = { onEvent(NewsCardEvent.SourceClick) }
+                onClick = { onEvent(NewsCardEvent.SourceClick) },
             ),
             text = model.sourceName,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
         )
         Text(
             text = model.publishedAt,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -146,14 +145,18 @@ private fun NewsCardSourceBadge(model: NewsCardModel, onEvent: (NewsCardEvent) -
 private fun NewsCardActions(
     modifier: Modifier = Modifier,
     model: NewsCardModel,
-    onEvent: (NewsCardEvent) -> Unit
+    onEvent: (NewsCardEvent) -> Unit,
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.End
+        horizontalArrangement = Arrangement.End,
     ) {
         IconButton(onClick = { onEvent(NewsCardEvent.ShareClick) }) {
-            Icon(Icons.Default.Share, contentDescription = "Share")
+            Icon(
+                imageVector = Icons.Default.Share,
+                contentDescription = "Share",
+                tint = colorScheme.onBackground,
+            )
         }
         IconButton(onClick = { onEvent(NewsCardEvent.BookmarkClick) }) {
             Icon(
@@ -166,8 +169,8 @@ private fun NewsCardActions(
                 tint = if (model.isBookmarked) {
                     colorScheme.primary
                 } else {
-                    Color.Unspecified
-                }
+                    colorScheme.onBackground
+                },
             )
         }
     }
@@ -186,8 +189,8 @@ private fun NewsCardPreview() {
                 title = "Sample Title",
                 description = "Sample Description",
                 publishedAt = "a moment ago",
-                isBookmarked = true
-            )
+                isBookmarked = true,
+            ),
         )
     }
     MyApplicationTheme {
@@ -201,7 +204,7 @@ private fun NewsCardPreview() {
 
                     else -> {}
                 }
-            }
+            },
         )
     }
 }
